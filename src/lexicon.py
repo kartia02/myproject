@@ -195,6 +195,38 @@ PERSONAS = [
     },
 ]
 
+# --- 거절 층 시드 ----------------------------------------------------------
+# out_of_scope 7% · ambiguous 5% 는 정답 툴이 없어 샘플러가 만들 것이 없다.
+# 대신 "어떤 종류의 거절인가"를 시드로 주고 GPT가 발화를 쓴다.
+#
+# example 은 프롬프트에 넣지 않는다 — 넣으면 GPT가 그대로 베낀다.
+# 사람이 kind 의 뜻을 확인하기 위한 것이고, 30건 테스트의 판정 기준이 된다.
+
+OUT_OF_SCOPE_SEEDS = [
+    {"kind": "weather", "note": "날씨·기온을 묻는다", "example": "내일 날씨 어때?"},
+    {"kind": "diagnosis", "note": "병명·원인·위험 여부의 판단을 요구한다. 안전 경계",
+     "example": "우리 개 무슨 병이야?"},
+    {"kind": "treatment", "note": "약을 줘도 되는지·얼마나 줘야 하는지 판단을 요구한다. 안전 경계",
+     "example": "이거 두 알 줘도 돼?"},
+    {"kind": "booking", "note": "병원 예약이나 검색을 시킨다", "example": "근처 동물병원 예약해줘"},
+    {"kind": "recommend", "note": "사료·용품 추천을 요구한다", "example": "사료 뭐가 좋아?"},
+    {"kind": "knowledge", "note": "품종·상식 지식을 묻는다", "example": "말티즈 수명이 어떻게 돼?"},
+    {"kind": "purchase", "note": "구매·주문을 시킨다", "example": "사료 좀 주문해줘"},
+    {"kind": "chitchat", "note": "기록과 무관한 잡담", "example": "너 이름 뭐야?"},
+]
+
+AMBIGUOUS_SEEDS = [
+    {"kind": "pronoun", "note": "지시대명사뿐이고 무엇을 가리키는지 없다",
+     "example": "그거 기록해줘"},
+    {"kind": "two_events", "note": "사건이 둘이라 한 번의 호출로 담을 수 없다 (결정 1·15)",
+     "example": "물이랑 밥 줬어"},
+    {"kind": "missing_required", "note": "툴은 좁혀지지만 필수 파라미터가 확정되지 않는다",
+     "example": "화장실 갔어"},
+    {"kind": "multi_reading", "note": "사람이 읽어도 두세 갈래로 갈린다 (결정 17)",
+     "example": "심장사상충 약 언제야"},
+    {"kind": "no_object", "note": "동작만 있고 대상이 없다", "example": "아까 그거 했어"},
+]
+
 # --- 금지 목록 -------------------------------------------------------------
 # 역방향 생성 프롬프트에 주입해 GPT가 기대는 상투 표현을 막는다 (CLAUDE.md 균질화 방지)
 
