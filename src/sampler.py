@@ -90,11 +90,11 @@ FREE_POOLS = {
 # 시간 파라미터가 어떤 종류의 표현을 받는가.
 # log_* 는 시점, get_records 는 구간, get_trend 는 기간 (결정 16 축①의 근거이기도 하다)
 TIME_POOLS = {
-    ("log_weight", "date"): ("relative_day", "weekday"),
-    ("get_records", "since"): ("relative_day", "weekday", "period"),
+    ("log_weight", "date"): ("relative_day", "relative_week", "weekday"),
+    ("get_records", "since"): ("relative_day", "relative_week", "weekday", "period"),
     ("get_records", "until"): ("relative_day", "weekday"),
     ("get_trend", "period"): ("period",),
-    ("get_vet_summary", "since"): ("relative_day", "period"),
+    ("get_vet_summary", "since"): ("relative_day", "relative_week", "period"),
 }
 DEFAULT_TIME_KINDS = ("time_of_day", "clock", "relative_day")
 
@@ -219,13 +219,10 @@ def sample(n, seed=0):
 
             elif layer == "confusion":
                 tool, other, why = rng.choice(CONFUSION_PAIRS)
-                extra = {
-                    "confuse_with": other,
-                    "note": (
-                        f"{other} 로 오인하기 쉬운 발화를 쓴다. 정답은 {tool} 이다. "
-                        f"근거 — {why}"
-                    ),
-                }
+                # 툴 이름은 구조화된 채로 둔다. GPT에게 보여줄 한국어 문장은
+                # generate.py 가 만든다 — GPT는 툴 이름을 모르고, 알 필요도 없다.
+                # why 는 프롬프트에 넣지 않는다. Day 4의 혼동 쌍별 오답률 분석용이다.
+                extra = {"confuse_with": other, "why": why}
                 label = _label(tool, _fill(tool, rng.randint(0, 2), rng))
 
             elif layer == "tense":
