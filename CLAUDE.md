@@ -307,6 +307,7 @@ Day 4까지 학습이 안 돌면 **포기하고 축소한다.** Day 2~3에 "GPT-
 - [checklist.md](checklist.md) — Day별 실행 체크리스트. 진행할 때마다 체크하고 하단 로그를 남긴다
 - [context-notes.md](context-notes.md) — 주제 선정 배경, **사용자 조사 과정과 결과**, 설계 근거, 리스크, 용어집
 - [explainer.md](explainer.md) — **이 프로젝트를 이해하고 남에게 설명하기 위한 문서.** 파인튜닝이 어디에 쓰이는지, 학습 2,000쌍이 무엇인지, 학습·검증·테스트를 왜 나누는지. 소개 대본과 예상 질문 포함. **Day 6 README의 밑글**
+- [labeling-guide.md](labeling-guide.md) — **데이터를 검수할 때 펼쳐놓고 보는 판정표.** 30건 샘플 테스트와 테스트 200건 검수가 이 문서를 기준으로 판단한다. 새 경계 케이스를 만나면 여기에 추가한다
 
-> 네 문서의 역할이 갈린다 — **CLAUDE.md는 규격, checklist는 할 일, context-notes는 근거, explainer는 설명.**
+> 다섯 문서의 역할이 갈린다 — **CLAUDE.md는 규격, checklist는 할 일, context-notes는 근거, explainer는 설명, labeling-guide는 판정.**
 > 새 내용을 적을 때 어디에 속하는지 먼저 정한다.
