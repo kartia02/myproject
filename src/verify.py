@@ -9,12 +9,29 @@
 모델이 발화대로 `"오전"`·`"절반 정도"` 를 출력하면 **정답 동작인데 오답으로 채점된다.**
 완전 일치율이 이유 없이 깎이고 7분류표의 "파라미터 오류" 칸이 오염된다.
 
-세 단계로 처리한다.
+**두 방향을 모두 본다.**
+
+정방향 — 라벨에 있는 값이 발화에 있는가
 
 1. 라벨 값이 발화 안에 있으면 통과
 2. 없으면 **같은 슬롯의 값 풀** 안에서 발화에 등장하는 값을 찾아 **라벨을 고친다**
    — 발화를 다시 만들지 않는 이유는 발화의 자연스러움이 이 데이터셋의 자산이기 때문이다
 3. 그것도 없으면 **버린다**
+
+역방향 — 발화에 있는 값이 라벨에 빠졌는가 (30건 테스트에서 발견한 구멍)
+
+    발화  "응가 상태가 좀 묽었던 것 같은데"
+    라벨  log_excretion(type="feces")        ← condition 이 비어 있다
+
+**정방향만 보면 이것을 통과시킨다.** 라벨에 있는 값은 전부 발화에 있기 때문이다.
+그러면 "말했는데 정답에는 없는" 데이터가 학습에 들어가고, 모델이 그 칸을 언제
+채우는지 배우지 못한다. 평가에서는 모델이 맞게 뽑아도 오답이 된다.
+
+그래서 **`null` 인 칸도 발화를 훑어 값이 있으면 채운다.**
+
+**한계** — 값 풀의 표층 어휘와 정확히 겹칠 때만 잡힌다. `"묽었던"` 은 시드에 있는
+`"묽게"`·`"무름"` 어느 쪽과도 문자열이 겹치지 않아 못 잡는다. 그래서 1차 방어는
+생성 프롬프트가 맡고(없는 정보를 덧붙이지 말 것) 여기는 2차 그물이다.
 
 같은 슬롯의 값 풀로 범위를 좁히는 것이 핵심이다. 발화 아무 데서나 표현을 주워오면
 `time` 칸에 음식 이름이 들어가는 사고가 난다.
@@ -51,11 +68,37 @@ def _candidates(tool, param):
     return {v: [v] for v in S._pool(tool, spec)}
 
 
+def _hits(cands, said, exclude=None):
+    """발화에 등장하는 후보 값들.
+
+    한 글자짜리 후보는 쓰지 않는다. `"다"` 같은 값은 `"줬다"`·`"먹었다"` 에 걸려
+    아무 발화에나 매칭되고, 그 결과 엉뚱한 라벨이 만들어진다.
+    """
+    return [k for k, surfaces in cands.items()
+            if k != exclude and any(len(norm(s)) > 1 and norm(s) in said
+                                    for s in surfaces)]
+
+
+def _longest(cands, hit):
+    """후보가 여럿이면 가장 긴 표층 표현을 가진 것을 고른다.
+
+    `"오늘 아침에 줬어"` 는 `"오늘"`·`"오늘 아침"`·`"아침"` 이 모두 걸린다.
+    사람이 라벨을 붙인다면 가장 구체적인 `"오늘 아침"` 을 고른다.
+    길이가 같은 것이 둘 이상이면 판단을 포기한다.
+    """
+    scored = [(max(len(norm(s)) for s in cands[k]), k) for k in hit]
+    scored.sort(reverse=True)
+    if len(scored) > 1 and scored[0][0] == scored[1][0]:
+        return None
+    return scored[0][1]
+
+
 def check(sample):
     """발화가 붙은 시드 하나를 검사한다.
 
     반환 — (판정, 고쳐진 시드 또는 None, 고친 내역)
     판정은 "ok" · "realigned" · "dropped" 중 하나다.
+    고친 내역의 값은 ``(이전, 이후)`` 이고, 이전이 ``None`` 이면 역방향으로 채운 것이다.
     """
     said = norm(sample["utterance"])
     label = sample["label"]
@@ -66,27 +109,28 @@ def check(sample):
     fixes = {}
 
     for param, value in label["arguments"].items():
-        if value is None:
-            continue
         cands = _candidates(label["tool"], param)
 
-        # 1) 라벨대로 들어있나
+        # --- 역방향 — 빈 칸인데 발화에 값이 있는가 ---
+        if value is None:
+            hit = _hits(cands, said)
+            if hit and (pick := _longest(cands, hit)):
+                args[param] = pick
+                fixes[param] = (None, pick)
+            continue
+
+        # --- 정방향 1) 라벨대로 들어있나 ---
         if any(norm(s) in said for s in cands.get(value, [value])):
             continue
 
-        # 2) 같은 슬롯의 다른 값이 들어있나 → 라벨을 고친다
-        #
-        # 한 글자짜리 후보는 쓰지 않는다. `"다"` 같은 값은 `"줬다"`·`"먹었다"` 에
-        # 걸려 아무 발화에나 매칭되고, 그 결과 엉뚱한 라벨로 바뀐다.
-        hit = [k for k, surfaces in cands.items()
-               if k != value and any(len(norm(s)) > 1 and norm(s) in said
-                                     for s in surfaces)]
+        # --- 정방향 2) 같은 슬롯의 다른 값이 들어있나 → 라벨을 고친다 ---
+        hit = _hits(cands, said, exclude=value)
         if len(hit) == 1:
             args[param] = hit[0]
             fixes[param] = (value, hit[0])
             continue
 
-        # 3) 특정 불가 — 버린다
+        # --- 정방향 3) 특정 불가 — 버린다 ---
         return "dropped", None, {param: (value, None)}
 
     if not fixes:
@@ -100,24 +144,29 @@ def verify(samples, verbose=True):
     재정렬률·폐기율이 높으면 **생성 프롬프트가 라벨을 무시하고 있다는 신호**다.
     데이터를 더 뽑기 전에 프롬프트부터 고친다.
     """
-    kept, stats, dropped_params, fixed_params = [], Counter(), Counter(), Counter()
+    kept, stats = [], Counter()
+    dropped_params, moved_params, filled_params = Counter(), Counter(), Counter()
 
     for s in samples:
         verdict, fixed, fixes = check(s)
         stats[verdict] += 1
         if verdict == "dropped":
             dropped_params[next(iter(fixes))] += 1
-        else:
-            kept.append(fixed)
-            fixed_params.update(fixes)
+            continue
+        kept.append(fixed)
+        for param, (before, _) in fixes.items():
+            # before 가 None 이면 빈 칸을 채운 것(역방향), 아니면 값을 바꾼 것(정방향)
+            (filled_params if before is None else moved_params)[param] += 1
 
     n = len(samples) or 1
     if verbose:
         print(f"검사 {len(samples)}건 — 통과 {stats['ok']} · "
-              f"재정렬 {stats['realigned']} ({stats['realigned'] / n:.1%}) · "
+              f"수정 {stats['realigned']} ({stats['realigned'] / n:.1%}) · "
               f"폐기 {stats['dropped']} ({stats['dropped'] / n:.1%})")
-        if fixed_params:
-            print(f"  재정렬된 슬롯 — {dict(fixed_params.most_common())}")
+        if moved_params:
+            print(f"  값 교체(정방향) — {dict(moved_params.most_common())}")
+        if filled_params:
+            print(f"  빈 칸 채움(역방향) — {dict(filled_params.most_common())}")
         if dropped_params:
             print(f"  폐기 원인 슬롯 — {dict(dropped_params.most_common())}")
 
@@ -135,12 +184,26 @@ if __name__ == "__main__":
         "hint": {},
     }
     cases = [
-        ("아침에 사료 반 그릇 줬어", "ok"),
-        ("저녁에 사료 반그릇 줬어", "realigned"),    # time 아침 → 저녁
-        ("아침에 사료 절반 정도 줬어", "realigned"),  # amount 반 그릇 → 절반
-        ("아침에 사료 쬐끔 줬어", "dropped"),         # 값 풀에 없는 표현
+        (seed, "아침에 사료 반 그릇 줬어", "ok"),
+        (seed, "저녁에 사료 반그릇 줬어", "realigned"),     # time 아침 → 저녁
+        (seed, "아침에 사료 절반 정도 줬어", "realigned"),   # amount 반 그릇 → 절반
+        (seed, "아침에 사료 쬐끔 줬어", "dropped"),          # 값 풀에 없는 표현
     ]
-    for utterance, expect in cases:
-        verdict, _, fixes = check({**seed, "utterance": utterance})
+
+    # 역방향 — 라벨이 비어 있는데 발화에 값이 있는 경우
+    empty = {
+        "id": "test2", "layer": "simple",
+        "label": {"tool": "log_excretion",
+                  "arguments": {"type": "feces", "condition": None, "time": None},
+                  "reason": None},
+        "hint": {},
+    }
+    cases += [
+        (empty, "응가 쌌어", "ok"),                          # 채울 것이 없다
+        (empty, "아침에 응가 쌌는데 설사였어", "realigned"),   # condition·time 채움
+    ]
+
+    for s, utterance, expect in cases:
+        verdict, _, fixes = check({**s, "utterance": utterance})
         mark = "○" if verdict == expect else "✗"
         print(f"{mark} {verdict:10s} {utterance}  {fixes}")
