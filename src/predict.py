@@ -45,6 +45,11 @@ import tools as T
 TEMPERATURE = 0.0
 N_SHOTS = 8
 
+# 생성 길이 상한. **Colab 실측과 같은 값이어야** 서빙 전후 비교가 성립한다.
+# 라벨이 106자짜리 JSON 한 줄이라 넉넉하고, 상한이 없으면 모델이 헛돌 때
+# 한 건에 몇 분씩 잡아먹는다. Ollama 기본값은 무제한이라 반드시 넘긴다.
+MAX_NEW_TOKENS = 160
+
 
 # --- 툴 스펙 프롬프트 -------------------------------------------------------
 # tools.py 에서 만든다. 문서를 손으로 옮겨 적으면 코드와 어긋난다.
@@ -175,18 +180,43 @@ def call_openai(messages, model, client):
     return res.choices[0].message.content, usage.prompt_tokens, usage.completion_tokens
 
 
+# Ollama 는 GGUF 안에 박힌 Jinja 채팅 템플릿을 쓴다. Modelfile 의 `TEMPLATE` 로
+# 덮으려 했으나 먹지 않았다(실측 — 입력 토큰이 그대로였다). **프롬프트가 바이너리
+# 안에 있으면 무엇이 들어갔는지 읽어서 확인할 수 없으므로** raw 모드로 직접 조립한다.
+# 아래 문자열은 학습 때 쓰인 Qwen3 템플릿의 출력과 같은 모양이다.
+QWEN_TURN = "<|im_start|>{role}\n{content}<|im_end|>\n"
+
+# 학습 라벨이 `<think>\n\n</think>\n\n{JSON}` 이었다 — Qwen3 템플릿이 assistant 턴에
+# 이 블록을 넣기 때문이고, `train_on_responses_only` 가 그 뒤 전부에 손실을 걸었다.
+# 그래서 모델은 이것을 먼저 뱉는 것이 정상이다.
+#
+# 그런데 GGUF 변환에서 특수 토큰 메타데이터가 어긋나 `<think>` 가 `</tool_call>` 로
+# 매핑되고 Ollama 가 그것을 정지 토큰으로 보아 **2토큰 만에 끝난다**(실측).
+# 모델이 어차피 낼 상수 접두사를 프롬프트에서 미리 준다 — `add_generation_prompt`
+# 과 같은 성격이고 재는 대상(JSON)은 바뀌지 않는다.
+#
+# ⚠ 대신 이 접두사만큼 **출력 토큰이 Colab 실측보다 적게 잡힌다.** 비교할 때 감안한다.
+THINK_PREFIX = "<think>\n\n</think>\n\n"
+
+
+def render_qwen(messages):
+    """메시지를 Qwen3 프롬프트 문자열로 편다. 학습 때와 같은 모양이어야 한다."""
+    turns = "".join(QWEN_TURN.format(**m) for m in messages)
+    return turns + "<|im_start|>assistant\n" + THINK_PREFIX
+
+
 def call_ollama(messages, model, endpoint):
     import urllib.request
 
     body = json.dumps({
-        "model": model, "messages": messages, "stream": False,
-        "options": {"temperature": TEMPERATURE},
+        "model": model, "prompt": render_qwen(messages), "raw": True, "stream": False,
+        "options": {"temperature": TEMPERATURE, "num_predict": MAX_NEW_TOKENS},
     }).encode()
-    req = urllib.request.Request(f"{endpoint}/api/chat", body,
+    req = urllib.request.Request(f"{endpoint}/api/generate", body,
                                  {"Content-Type": "application/json"})
     with urllib.request.urlopen(req) as res:
         data = json.load(res)
-    return (data["message"]["content"],
+    return (data.get("response") or "",
             data.get("prompt_eval_count"), data.get("eval_count"))
 
 
