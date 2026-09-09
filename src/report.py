@@ -73,7 +73,10 @@ def collect(base, name, ev, pr, paid):
         return None
 
     rows = load(ev_path)
-    preds = load(pr_path)
+    # 검수에서 버린 건은 채점 결과에 없다. 예측 파일은 그대로 200건이므로
+    # 걸러내지 않으면 지연·토큰·`<think>` 만 다른 모수로 계산된다.
+    scored = {r["id"] for r in rows}
+    preds = [p for p in load(pr_path) if p["id"] in scored]
     n = len(rows)
     lat = sorted(p["latency_ms"] for p in preds)
     ins = [p["input_tokens"] for p in preds if p.get("input_tokens")]

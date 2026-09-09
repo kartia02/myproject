@@ -233,6 +233,8 @@ def main():
     parser.add_argument("--gold", help="정답 데이터셋 JSONL")
     parser.add_argument("--pred", help="모델 원문 출력 JSONL")
     parser.add_argument("--details", help="건별 채점 결과를 JSONL로 저장")
+    parser.add_argument("--subset", action="store_true",
+                        help="검수에서 버린 건이 있어 시험지가 예측보다 적은 경우")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -253,10 +255,15 @@ def main():
             raise SystemExit(f"예측 {row.get('id')} — output·prediction·text 키가 없다")
         predictions[row["id"]] = text
 
+    # 누락은 언제나 오류다 — 안 푼 문제를 0점이 아니라 없는 문제로 세면 안 된다.
+    # 남는 예측은 검수에서 버린 건일 수 있으므로 `--subset` 일 때만 허용하고,
+    # 그 경우에도 몇 건이 빠졌는지 찍는다. 조용히 줄어드는 것이 제일 나쁘다.
     missing = set(gold) - set(predictions)
     extra = set(predictions) - set(gold)
-    if missing or extra:
+    if missing or (extra and not args.subset):
         raise SystemExit(f"id 불일치 — 누락 {len(missing)}건 · 추가 {len(extra)}건")
+    if extra:
+        print(f"시험지에 없는 예측 {len(extra)}건은 채점에서 뺀다 (--subset)")
 
     results, counts = [], Counter()
     by_layer, by_tool = defaultdict(Counter), defaultdict(Counter)
