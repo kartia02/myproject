@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="220" viewBox="0 0 760 220" role="img"><style>
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .fg { fill: #111827 } .mut { fill: #6b7280 } .grid { stroke: #e5e7eb }
+  .track { fill: #f3f4f6 }
+  @media (prefers-color-scheme: dark) {
+    .fg { fill: #e5e7eb } .mut { fill: #9ca3af } .grid { stroke: #374151 }
+    .track { fill: #1f2937 }
+  }
+</style><text x="24" y="26" class="fg" font-size="15" font-weight="600">완전 일치율 — 테스트 169건</text><text x="164" y="63" text-anchor="end" class="fg" font-size="13" font-weight="400">GPT-4.1</text><rect x="174" y="51" width="502" height="16" rx="3" class="track"/><rect x="174" y="51" width="368.3" height="16" rx="3" fill="#6b7280"/><text x="684" y="64" class="fg" font-size="12" font-weight="400">73.4%</text><text x="164" y="103" text-anchor="end" class="fg" font-size="13" font-weight="400">base + few-shot</text><rect x="174" y="91" width="502" height="16" rx="3" class="track"/><rect x="174" y="91" width="213.9" height="16" rx="3" fill="#9ca3af"/><text x="684" y="104" class="fg" font-size="12" font-weight="400">42.6%</text><text x="164" y="143" text-anchor="end" class="fg" font-size="13" font-weight="600">파인튜닝</text><rect x="174" y="131" width="502" height="16" rx="3" class="track"/><rect x="174" y="131" width="436.7" height="16" rx="3" fill="#2563eb"/><text x="684" y="144" class="fg" font-size="12" font-weight="600">87.0%</text><text x="164" y="183" text-anchor="end" class="fg" font-size="13" font-weight="400">파인튜닝 (Ollama)</text><rect x="174" y="171" width="502" height="16" rx="3" class="track"/><rect x="174" y="171" width="398.0" height="16" rx="3" fill="#60a5fa"/><text x="684" y="184" class="fg" font-size="12" font-weight="400">79.3%</text></svg>
