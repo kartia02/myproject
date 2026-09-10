@@ -205,12 +205,23 @@ def render_qwen(messages):
     return turns + "<|im_start|>assistant\n" + THINK_PREFIX
 
 
-def call_ollama(messages, model, endpoint):
+def call_ollama(messages, model, endpoint, num_gpu=None):
+    """``num_gpu`` 는 GPU에 올릴 층 수다. **0이면 CPU-only 추론**이 된다.
+
+    CLAUDE.md가 온디바이스 타당성을 **GGUF 파일 크기 + CPU-only 지연** 둘로
+    간접 논증한다고 못 박았으므로 이 경로가 필요하다. 환경 변수로 서비스를
+    다시 띄우는 대신 **요청 단위로 넘긴다** — 돌아가는 Ollama 를 건드리지 않고,
+    무엇을 켜고 잰 숫자인지가 명령줄에 남는다.
+    """
     import urllib.request
+
+    options = {"temperature": TEMPERATURE, "num_predict": MAX_NEW_TOKENS}
+    if num_gpu is not None:
+        options["num_gpu"] = num_gpu
 
     body = json.dumps({
         "model": model, "prompt": render_qwen(messages), "raw": True, "stream": False,
-        "options": {"temperature": TEMPERATURE, "num_predict": MAX_NEW_TOKENS},
+        "options": options,
     }).encode()
     req = urllib.request.Request(f"{endpoint}/api/generate", body,
                                  {"Content-Type": "application/json"})
@@ -231,6 +242,8 @@ def main():
     ap.add_argument("--model", help="기본값 — gpt41이면 gpt-4.1, 그 외는 지정 필수")
     ap.add_argument("--endpoint", default="http://localhost:11434")
     ap.add_argument("--limit", type=int, help="앞에서 N건만. 연결 확인용")
+    ap.add_argument("--num-gpu", type=int, dest="num_gpu",
+                    help="ollama 전용 — GPU에 올릴 층 수. 0이면 CPU-only 추론")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.input, encoding="utf-8") if l.strip()]
@@ -277,7 +290,7 @@ def main():
             if args.engine == "openai":
                 text, pt, ct = call_openai(messages, model, client)
             else:
-                text, pt, ct = call_ollama(messages, model, args.endpoint)
+                text, pt, ct = call_ollama(messages, model, args.endpoint, args.num_gpu)
         except Exception as e:
             # 빈 출력을 남긴다. 건너뛰면 id 가 어긋나 채점기가 멈춘다.
             # 채점에서는 파싱 실패로 잡히고, 그건 사실 그대로다

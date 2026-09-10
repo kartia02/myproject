@@ -42,6 +42,9 @@ TONE = {
     "base + few-shot": "#9ca3af",
     "파인튜닝": "#2563eb",
     "파인튜닝 (Ollama)": "#60a5fa",
+    # 같은 4비트 모델을 CPU 에만 올린 것이라 Ollama 와 한 계열로 둔다.
+    # 정확도는 사실상 같고 달라지는 것은 지연뿐이다
+    "파인튜닝 (CPU-only)": "#93c5fd",
 }
 
 SEGMENT = [

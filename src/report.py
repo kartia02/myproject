@@ -44,6 +44,13 @@ PRICING_NOTE = "2026-09-07 확인 · 요금은 report.py 상단 상수"
 # 정의했으므로 그쪽을 택한다. 정가 기준도 표에 함께 낸다.
 USE_CACHED_FOR_VERDICT = True
 
+# **비용을 내지 않는 대상.** (a) 의 계산법은 *"로컬 추론 시간 × 클라우드 GPU 시간 단가"*
+# 로 Day 0에 고정됐는데, CPU-only 실행에는 그 공식이 적용되지 않는다. CPU 시간 단가는
+# 착수 때 정하지 않았고 **지금 하나 만들어 넣는 것은 사후 변경**이다.
+# GPU 단가를 그대로 쓰면 CPU 시간을 GPU 값으로 매기는 셈이라 숫자가 틀린다.
+# 이 열은 **지연과 정확도를 보려고 있는 것**이지 비용을 보려고 있는 것이 아니다.
+NO_PRICE = {"파인튜닝 (CPU-only)"}
+
 CATEGORIES = ["exact", "parameter_error", "wrong_tool", "tool_hallucination",
               "schema_violation", "parse_failure", "over_refusal", "missed_refusal"]
 LABEL = {
@@ -59,6 +66,7 @@ TARGETS = [
     ("base + few-shot", "eval_base.jsonl", "pred_base.jsonl", False),
     ("**파인튜닝**", "eval_ft.jsonl", "pred_ft_lr0.0002_ep2.jsonl", False),
     ("파인튜닝 (Ollama)", "eval_ollama.jsonl", "pred_ollama.jsonl", False),
+    ("파인튜닝 (CPU-only)", "eval_cpu.jsonl", "pred_cpu.jsonl", False),
 ]
 
 
@@ -141,10 +149,10 @@ def table(targets):
     row("지연 p95", lambda t: f'{t["p95"]:,.0f}ms')
     row("코드펜스", lambda t: f'{t["fenced"]}건')
     row("`<think>` 블록", lambda t: f'{t["think"]}건')
-    row("1,000건당 (a) 정가 기준", lambda t: f"${cost(t)[0]:.3f}")
-    row("**1,000건당 (a) 캐시 적용 — 판정 기준**",
-        lambda t: f"${cost(t, cached=True)[0]:.3f}")
-    row("(b) 사업자 부담", lambda t: f"${cost(t)[1]:.3f}")
+    money = lambda t, i, c=False: "—" if t["name"] in NO_PRICE else f"${cost(t, c)[i]:.3f}"
+    row("1,000건당 (a) 정가 기준", lambda t: money(t, 0))
+    row("**1,000건당 (a) 캐시 적용 — 판정 기준**", lambda t: money(t, 0, True))
+    row("(b) 사업자 부담", lambda t: money(t, 1))
     return "\n".join(out)
 
 
