@@ -509,11 +509,28 @@ P1 3/3 ✅    P2 1/3 (정확도 119% ✅ · 비용 ❌ · 지연 ❌)
 
 | | 분량 | 필수인가 | 어디서 |
 | --- | --- | --- | --- |
+| **⓪ `data/` 옮기기** | 5분 | **필수** — 없으면 ①이 안 돌아간다 | 카톡 → 데스크탑 |
 | **① CPU-only 지연 측정** | 30분 | **필수** — 온디바이스 논증의 절반 | **데스크탑 전용** |
 | ~~② MCP 연동 2단계 계획 문단~~ | — | **2026-09-10 완료** | — |
 | ③ Day 7 확장 실험 | 반나절~ | 선택 | 아래 별도 절 |
 
 > **필수로 남은 것은 ① 하나다.** 노트북 PC에는 Ollama도 NVIDIA GPU도 없으므로 **데스크탑에 앉을 때까지 이 칸은 못 채운다.**
+
+#### ⓪ 먼저 — `data/` 를 데스크탑으로 옮긴다
+
+**`.gitignore` 가 `data/*` 를 막으므로 `git pull` 로는 안 넘어간다.** 검수·재채점을 노트북 PC에서 했기 때문에 **데스크탑의 `data/` 는 검수 전 상태**이고, 그대로 ①을 돌리면 `test_reviewed.jsonl` 이 없어 첫 명령에서 멈춘다.
+
+```
+바탕화면\pawnote_data_0910.zip   (133KB · 2026-09-10 생성)
+  test_reviewed.jsonl  ← 이게 없으면 ①이 아예 안 된다
+  eval_*.jsonl 4개 · report.md · report_prereview.md
+  review_applied.md · review_draft.tsv · review_decisions.tsv · dedup.md
+  test.jsonl · train.jsonl · val.jsonl
+```
+
+카톡으로 보내 **데스크탑 `data/` 에 덮어쓴다.** `embeddings.jsonl`(69MB)은 뺐다 — 임베딩 캐시일 뿐이고 데스크탑에서 다시 쓸 일이 없다.
+
+> **한 번 겪은 사고다.** 낡은 `data/` 로 채점해 `pred_ft` 가 89.5% 로 나왔고 원인 찾는 데 시간을 썼다. **옮긴 뒤 `python src/report.py --print` 로 87.0% 가 나오는지 먼저 확인한다.**
 
 #### ① CPU-only 지연 — 데스크탑에서만 한다
 
