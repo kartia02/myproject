@@ -1,0 +1,12 @@
+{
+  "night-restlessness": [
+    {"metric": "evening_walk_minutes", "direction": "decrease", "start_date": "2026-07-31"},
+    {"metric": "night_awakenings", "direction": "increase", "start_date": "2026-08-03"},
+    {"metric": "scratching_count", "direction": "increase", "start_date": "2026-08-05"}
+  ],
+  "rainy-slowdown": [
+    {"metric": "evening_walk_minutes", "direction": "decrease", "start_date": "2026-08-15"},
+    {"metric": "activity_minutes", "direction": "decrease", "start_date": "2026-08-15"}
+  ],
+  "stable-routine": []
+}
