@@ -2,7 +2,8 @@
   "dataset": {
     "scenarios": 3,
     "days_per_scenario": 60,
-    "ground_truth_changes": 5
+    "robustness_cases": 23,
+    "ground_truth_changes": 19
   },
   "change_detection_precision": 1.0,
   "change_detection_recall": 1.0,
@@ -10,11 +11,13 @@
   "mean_start_date_error_days": 0.0,
   "evidence_precision": 1.0,
   "unsupported_claim_rate": 0.0,
-  "true_positives": 5,
+  "robustness_cases_passed": 23,
+  "robustness_cases_total": 23,
+  "true_positives": 19,
   "false_positives": 0,
   "false_negatives": 0,
   "notes": [
-    "Synthetic v1 evaluation only; the sample is intentionally small.",
+    "Synthetic v1 evaluation includes 3 public scenarios and 23 deterministic robustness cases.",
     "Evidence metrics in this run evaluate the deterministic fallback report.",
     "Live GPT-5.6 Luna output must be evaluated separately after an API key is configured."
   ]

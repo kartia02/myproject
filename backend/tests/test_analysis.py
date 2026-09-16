@@ -61,9 +61,26 @@ def test_detects_change_after_constant_baseline() -> None:
     assert activity.effect_size == 1.5
 
 
+def test_ignores_tiny_change_after_zero_constant_baseline() -> None:
+    records = [record(day, 0 if day < BASELINE_DAYS else 1) for day in range(37)]
+
+    changes = detect_changes(records)
+
+    assert all(item.metric != "activity_minutes" for item in changes)
+
+
+def test_constant_baseline_start_date_is_actual_sustained_change() -> None:
+    records = [record(day, 10) for day in range(45)]
+    records.extend(record(day, 25) for day in range(45, 60))
+
+    activity = next(item for item in detect_changes(records) if item.metric == "activity_minutes")
+
+    assert activity.start_date == date(2026, 2, 15)
+
+
 def test_start_date_is_first_changed_day_in_qualifying_window() -> None:
     records = [record(day, 10 + day % 2) for day in range(BASELINE_DAYS)]
-    records.extend(record(day, 10.5 if day == BASELINE_DAYS else 20) for day in range(30, 37))
+    records.extend(record(day, 10.5 if day == BASELINE_DAYS else 25) for day in range(30, 37))
 
     activity = next(item for item in detect_changes(records) if item.metric == "activity_minutes")
 

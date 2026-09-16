@@ -1,5 +1,6 @@
-from app.agent import _agent_response_is_valid, investigate
+from app.agent import _agent_response_is_valid, _required_tools_were_called, investigate
 from app.config import Settings
+from app.schemas import ToolTrace
 from app.synthetic import get_scenario
 
 
@@ -38,3 +39,17 @@ def test_agent_response_rejects_unsupported_numbers_and_causal_claims() -> None:
 
     assert not _agent_response_is_valid(unsupported_number, evidence)
     assert not _agent_response_is_valid(causal_claim, evidence)
+
+
+def test_agent_mode_requires_each_investigation_tool_exactly_once() -> None:
+    complete = [
+        ToolTrace(step=1, tool="get_baseline", summary="done"),
+        ToolTrace(step=2, tool="detect_changes", summary="done"),
+        ToolTrace(step=3, tool="compare_periods", summary="done"),
+        ToolTrace(step=4, tool="get_events", summary="done"),
+    ]
+    duplicate = complete[:-1] + [ToolTrace(step=4, tool="detect_changes", summary="done")]
+
+    assert _required_tools_were_called(complete)
+    assert not _required_tools_were_called(complete[:-1])
+    assert not _required_tools_were_called(duplicate)

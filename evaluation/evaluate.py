@@ -12,6 +12,7 @@ from app.agent import investigate
 from app.analysis import detect_changes
 from app.config import Settings
 from app.synthetic import get_scenario
+from robustness_cases import build_robustness_cases
 
 
 def main() -> None:
@@ -43,6 +44,21 @@ def main() -> None:
         total_claims += len(cited_ids)
         supported_claims += len(cited_ids & evidence_ids)
 
+    robustness_cases = build_robustness_cases()
+    robustness_passed = 0
+    for case in robustness_cases:
+        findings = detect_changes(case.records)
+        predicted = {(item.metric, item.direction): item for item in findings}
+        matches = predicted.keys() & case.expected
+        true_positives += len(matches)
+        false_positives += len(predicted.keys() - case.expected)
+        false_negatives += len(case.expected - predicted.keys())
+        if predicted.keys() == case.expected:
+            robustness_passed += 1
+        if case.expected_start_date:
+            for key in matches:
+                start_errors.append(abs((predicted[key].start_date - case.expected_start_date).days))
+
     precision = true_positives / (true_positives + false_positives) if true_positives + false_positives else 1.0
     recall = true_positives / (true_positives + false_negatives) if true_positives + false_negatives else 1.0
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
@@ -54,6 +70,8 @@ def main() -> None:
         "mean_start_date_error_days": round(sum(start_errors) / len(start_errors), 2) if start_errors else None,
         "evidence_precision": round(evidence_precision, 3),
         "unsupported_claim_rate": round(1 - evidence_precision, 3),
+        "robustness_cases_passed": robustness_passed,
+        "robustness_cases_total": len(robustness_cases),
         "true_positives": true_positives,
         "false_positives": false_positives,
         "false_negatives": false_negatives

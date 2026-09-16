@@ -54,7 +54,7 @@ def calculate_baseline(records: list[DailyRecord]) -> list[BaselineMetric]:
     if len(baseline_records) < BASELINE_DAYS:
         return []
     results: list[BaselineMetric] = []
-    for metric, (label, unit, _) in METRICS.items():
+    for metric, (label, unit, _, _) in METRICS.items():
         values = _values(baseline_records, metric)
         results.append(
             BaselineMetric(
@@ -71,27 +71,31 @@ def calculate_baseline(records: list[DailyRecord]) -> list[BaselineMetric]:
 
 
 def _estimate_start_date(
-    records: list[DailyRecord], metric: str, baseline_mean: float, baseline_std: float, direction: str
+    records: list[DailyRecord],
+    metric: str,
+    baseline_mean: float,
+    baseline_std: float,
+    minimum_absolute_change: float,
+    direction: str,
 ) -> date:
     post_baseline = records[BASELINE_DAYS:]
-    if baseline_std <= 0:
-        return post_baseline[0].date
+    deviation = baseline_std if baseline_std > 0 else minimum_absolute_change
     for index in range(max(0, len(post_baseline) - 3)):
         window = post_baseline[index : index + 4]
         if len(window) < 4:
             break
         values = _values(window, metric)
-        if direction == "increase" and int((values > baseline_mean + baseline_std).sum()) >= 3:
+        if direction == "increase" and int((values >= baseline_mean + deviation).sum()) >= 3:
             return next(
                 record.date
                 for record in window
-                if float(getattr(record, metric)) > baseline_mean + baseline_std
+                if float(getattr(record, metric)) >= baseline_mean + deviation
             )
-        if direction == "decrease" and int((values < baseline_mean - baseline_std).sum()) >= 3:
+        if direction == "decrease" and int((values <= baseline_mean - deviation).sum()) >= 3:
             return next(
                 record.date
                 for record in window
-                if float(getattr(record, metric)) < baseline_mean - baseline_std
+                if float(getattr(record, metric)) <= baseline_mean - deviation
             )
     return records[-COMPARISON_DAYS].date
 
@@ -104,7 +108,7 @@ def detect_changes(records: list[DailyRecord]) -> list[ChangeFinding]:
     comparison_records = records[-COMPARISON_DAYS:]
     findings: list[ChangeFinding] = []
 
-    for metric, (label, unit, minimum_percent) in METRICS.items():
+    for metric, (label, unit, minimum_percent, minimum_absolute_change) in METRICS.items():
         baseline = _values(baseline_records, metric)
         comparison = _values(comparison_records, metric)
         baseline_mean = float(baseline.mean())
@@ -126,17 +130,26 @@ def detect_changes(records: list[DailyRecord]) -> list[ChangeFinding]:
         relative_change_is_large = (
             abs(percent_change) / 100 >= minimum_percent
             if percent_change is not None
-            else difference != 0
+            else True
         )
+        absolute_change_is_large = abs(difference) >= minimum_absolute_change
 
         if (
             effect_size is None
             or effect_size < MIN_EFFECT_SIZE
             or not relative_change_is_large
+            or not absolute_change_is_large
             or changed_days < MIN_CHANGED_DAYS
         ):
             continue
-        start_date = _estimate_start_date(records, metric, baseline_mean, baseline_std, direction)
+        start_date = _estimate_start_date(
+            records,
+            metric,
+            baseline_mean,
+            baseline_std,
+            minimum_absolute_change,
+            direction,
+        )
         severity = effect_size * sqrt(changed_days / COMPARISON_DAYS)
         findings.append(
             ChangeFinding(
@@ -166,11 +179,11 @@ def compare_periods(records: list[DailyRecord], metrics: list[str] | None = None
     baseline_records = records[:BASELINE_DAYS]
     comparison_records = records[-COMPARISON_DAYS:]
     output: list[dict] = []
-    catalog = METRICS | {name: (*details, 0.0) for name, details in ENVIRONMENT_METRICS.items()}
+    catalog = METRICS | {name: (*details, 0.0, 0.0) for name, details in ENVIRONMENT_METRICS.items()}
     for metric in requested:
         if metric not in catalog:
             continue
-        label, unit, _ = catalog[metric]
+        label, unit, _, _ = catalog[metric]
         before = float(_values(baseline_records, metric).mean())
         after = float(_values(comparison_records, metric).mean())
         percent = ((after - before) / before * 100) if before else None

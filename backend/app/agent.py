@@ -14,6 +14,7 @@ from .tools import TOOL_DEFINITIONS, execute_tool_json
 
 logger = logging.getLogger(__name__)
 
+REQUIRED_TOOL_NAMES = frozenset(definition["name"] for definition in TOOL_DEFINITIONS)
 _NUMBER_OR_DATE = re.compile(r"\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?%?")
 _FORBIDDEN_ASSERTIONS = (
     re.compile(r"(?:원인|이유)(?:이|가|으로)?\s*(?:다|입니다)"),
@@ -74,6 +75,11 @@ def _agent_response_is_valid(text: str, evidence: list[Evidence]) -> bool:
             return False
 
     return True
+
+
+def _required_tools_were_called(trace: list[ToolTrace]) -> bool:
+    called = [item.tool for item in trace]
+    return len(called) == len(REQUIRED_TOOL_NAMES) and set(called) == REQUIRED_TOOL_NAMES
 
 
 def _run_tool_agent(
@@ -143,12 +149,12 @@ def investigate(
     if use_llm and settings.openai_api_key:
         try:
             agent_text, agent_trace = _run_tool_agent(scenario, question, evidence, settings)
-            if _agent_response_is_valid(agent_text, evidence):
+            if _required_tools_were_called(agent_trace) and _agent_response_is_valid(agent_text, evidence):
                 summary = agent_text
                 trace = agent_trace
                 mode = "agent"
             else:
-                logger.warning("Agent response failed evidence validation; using deterministic fallback")
+                logger.warning("Agent response failed tool or evidence validation; using deterministic fallback")
         except Exception:
             # The public demo still returns calculated evidence when the model is unavailable.
             logger.exception("Agent investigation failed; using deterministic fallback")

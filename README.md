@@ -5,9 +5,9 @@
 ## 현재 구현
 
 - 60일 Synthetic Scenario 3종과 평가 전용 Ground Truth
-- Fixed Personal Baseline과 설명 가능한 변화 탐지
+- Fixed Personal Baseline과 변화율·절대 변화량·효과크기를 함께 사용하는 설명 가능한 변화 탐지
 - `get_baseline`, `detect_changes`, `compare_periods`, `get_events` Tool
-- OpenAI Responses API 기반 Agent 및 문장별 Evidence·수치·금지 주장 검증
+- OpenAI Responses API 기반 Agent 및 필수 Tool 호출·문장별 Evidence·수치·금지 주장 검증
 - API 실패 시에도 동작하는 계산 기반 안전 리포트
 - FastAPI REST API, React Dashboard, PostgreSQL 저장
 - IP 기반 Rate Limit, Agent 최대 4 Step, 출력 토큰 제한
@@ -53,8 +53,8 @@ cd ../frontend
 npm run build
 ```
 
-평가 결과는 변화 탐지 Precision·Recall·F1, 변화 시작일 오차, Evidence Precision, Unsupported Claim Rate를 출력합니다.
-현재 고정 평가 결과는 [`evaluation/results.json`](evaluation/results.json)에 보관합니다. 이 수치는 3개 합성 시나리오의 초기 검증값이며, 실제 Luna 응답 평가는 API Key 설정 후 별도 실행해야 합니다.
+평가 결과는 변화 탐지 Precision·Recall·F1, 변화 시작일 오차, 강건성 케이스 통과 수, Evidence Precision, Unsupported Claim Rate를 출력합니다.
+현재 고정 평가 결과는 [`evaluation/results.json`](evaluation/results.json)에 보관합니다. 3개 공개 시나리오와 23개 결정론적 강건성 케이스를 검증하며, 실제 Luna 응답 평가는 API Key 설정 후 별도 실행해야 합니다.
 
 ## API
 
