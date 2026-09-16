@@ -74,6 +74,8 @@ if settings.database_url == "sqlite:///:memory:":
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+elif settings.database_url.startswith("postgresql"):
+    engine_options["pool_recycle"] = 300
 engine = create_engine(settings.database_url, **engine_options)
 
 

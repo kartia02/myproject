@@ -6,7 +6,7 @@
 
 - 사전 생성 Synthetic Scenario 선택형 공개 데모
 - 계정, 로그인, 데이터 업로드 없음
-- React + TypeScript, FastAPI, PostgreSQL
+- React + TypeScript, FastAPI, Neon PostgreSQL
 - OpenAI Responses API와 `gpt-5.6-luna`를 기본 Agent 모델로 사용
 - 월 API 비용 $5 이하를 목표로 요청당 최대 4회 Tool 호출, 최대 900 출력 토큰, 분당 10회 제한 적용
 - API Key 또는 LLM 호출 실패 시 계산된 Evidence를 이용한 안전한 규칙 기반 리포트 제공

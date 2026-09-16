@@ -42,6 +42,8 @@ npm run dev
 
 기본 개발 DB는 SQLite이며 Docker 환경에서는 PostgreSQL을 사용합니다.
 
+운영 PostgreSQL은 Neon을 사용합니다. Neon pooled connection string 설정과 검증 절차는 [Neon 연결 문서](docs/neon-setup.md)를 따릅니다.
+
 ## 검증
 
 ```bash
