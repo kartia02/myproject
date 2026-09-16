@@ -58,5 +58,14 @@ export type Report = {
   changes: ChangeFinding[];
   evidence: Evidence[];
   tool_trace: { step: number; tool: string; summary: string }[];
+  agent_usage: {
+    api_requests: number;
+    tool_calls: number;
+    input_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+    latency_ms: number;
+    accepted: boolean;
+  } | null;
   limitations: string[];
 };

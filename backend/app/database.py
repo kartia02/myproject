@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, JSON, String, Text, create_engine, select
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, JSON, String, Text, create_engine, delete, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
 from sqlalchemy.pool import StaticPool
 
@@ -80,12 +80,11 @@ engine = create_engine(settings.database_url, **engine_options)
 def initialize_database() -> None:
     Base.metadata.create_all(engine)
     with Session(engine) as session:
-        if session.scalar(select(ScenarioRow.id).limit(1)) is not None:
-            return
         for detail in all_scenarios():
             summary = detail.scenario
-            session.add(
-                ScenarioRow(
+            row = session.get(ScenarioRow, summary.id)
+            if row is None:
+                row = ScenarioRow(
                     id=summary.id,
                     name=summary.name,
                     dog_name=summary.dog_name,
@@ -94,8 +93,39 @@ def initialize_database() -> None:
                     end_date=summary.end_date,
                     days=summary.days,
                 )
-            )
-            session.flush()
+                session.add(row)
+                session.flush()
+            else:
+                stored_records = session.scalars(
+                    select(DailyRecordRow)
+                    .where(DailyRecordRow.scenario_id == summary.id)
+                    .order_by(DailyRecordRow.date)
+                ).all()
+                stored_events = session.scalars(
+                    select(PetEventRow)
+                    .where(PetEventRow.scenario_id == summary.id)
+                    .order_by(PetEventRow.date)
+                ).all()
+                records_match = [
+                    DailyRecord.model_validate(item, from_attributes=True) for item in stored_records
+                ] == detail.records
+                events_match = [
+                    PetEvent.model_validate(item, from_attributes=True) for item in stored_events
+                ] == detail.events
+                summary_matches = all(
+                    getattr(row, field) == getattr(summary, field)
+                    for field in ("name", "dog_name", "description", "start_date", "end_date", "days")
+                )
+                if records_match and events_match and summary_matches:
+                    continue
+                row.name = summary.name
+                row.dog_name = summary.dog_name
+                row.description = summary.description
+                row.start_date = summary.start_date
+                row.end_date = summary.end_date
+                row.days = summary.days
+                session.execute(delete(DailyRecordRow).where(DailyRecordRow.scenario_id == summary.id))
+                session.execute(delete(PetEventRow).where(PetEventRow.scenario_id == summary.id))
             session.add_all(
                 [DailyRecordRow(scenario_id=summary.id, **record.model_dump()) for record in detail.records]
             )

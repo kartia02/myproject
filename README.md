@@ -49,12 +49,15 @@ cd backend
 pytest
 cd ../evaluation
 python evaluate.py
+# 유료 실제 모델 평가(키 설정 후)
+python evaluate_live.py --runs 1
 cd ../frontend
 npm run build
 ```
 
 평가 결과는 변화 탐지 Precision·Recall·F1, 변화 시작일 오차, 강건성 케이스 통과 수, Evidence Precision, Unsupported Claim Rate를 출력합니다.
 현재 고정 평가 결과는 [`evaluation/results.json`](evaluation/results.json)에 보관합니다. 3개 공개 시나리오와 23개 결정론적 강건성 케이스를 검증하며, 실제 Luna 응답 평가는 API Key 설정 후 별도 실행해야 합니다.
+실제 Luna 표본 결과는 [`evaluation/live_results.json`](evaluation/live_results.json)에 보관합니다. Agent 리포트에는 API 요청 수, Tool 호출 수, 입력·출력 토큰, 지연 시간과 채택 여부가 포함됩니다.
 
 ## API
 

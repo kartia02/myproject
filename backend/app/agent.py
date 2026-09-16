@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import logging
 import re
+from time import perf_counter
 
 from openai import OpenAI
 
 from .analysis import build_evidence, detect_changes
 from .config import Settings
-from .schemas import Evidence, InvestigationReport, ScenarioDetail, ToolTrace
+from .metrics import METRICS
+from .schemas import AgentUsage, Evidence, InvestigationReport, ScenarioDetail, ToolTrace
 from .tools import TOOL_DEFINITIONS, execute_tool_json
 
 
@@ -16,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 REQUIRED_TOOL_NAMES = frozenset(definition["name"] for definition in TOOL_DEFINITIONS)
 _NUMBER_OR_DATE = re.compile(r"\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?%?")
+_KOREAN_DATE = re.compile(r"(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일")
+_SHORT_DATE_RANGE = re.compile(r"(\d{4})-(\d{2})-(\d{2})~(\d{2})-(\d{2})")
 _FORBIDDEN_ASSERTIONS = (
     re.compile(r"(?:원인|이유)(?:이|가|으로)?\s*(?:다|입니다)"),
     re.compile(r"때문에[^.?!]*(?:증가|감소|변화)"),
@@ -27,9 +31,10 @@ _FORBIDDEN_ASSERTIONS = (
 AGENT_INSTRUCTIONS = """
 당신은 반려견 행동 변화 조사 Agent다. 질병이나 인과관계를 추정하거나 진단하지 않는다.
 반드시 제공된 네 도구로 개인 Baseline, 변화, 기간 비교, 이벤트를 조사한다.
-최종 답변은 한국어 2~4문장으로 작성한다. 확인한 변화와 같은 시기에 기록된 사실만 말한다.
-각 문장 끝에 근거가 되는 [E1] 형식의 Evidence ID를 붙인다. Evidence에 없는 수치를 만들지 않는다.
-관련 요인은 원인이라고 단정하지 말고 '같은 시기에 나타났다'고 표현한다.
+최종 답변은 서버가 제공한 모든 Evidence를 빠짐없이 각각 한 문장으로 작성한다.
+각 문장은 Evidence의 statement를 그대로 복사한 뒤 해당 [E1] 형식의 ID를 붙인다. 서로 다른 Evidence를 한 문장으로 합치지 않는다.
+조사 대상 이름, Evidence에 없는 날짜·기간·수치·해석을 추가하지 않는다.
+이벤트는 관찰 기록일 뿐 변화의 원인이나 질병이라고 표현하지 않는다.
 """.strip()
 
 
@@ -54,9 +59,14 @@ def _agent_response_is_valid(text: str, evidence: list[Evidence]) -> bool:
     if not text.strip() or any(pattern.search(text) for pattern in _FORBIDDEN_ASSERTIONS):
         return False
 
+    normalized_text = re.sub(
+        r"([.!?])\s*((?:\[E\d+\]\s*)+)",
+        lambda match: f" {match.group(2).strip()}{match.group(1)} ",
+        text.strip(),
+    )
     sentences = [
         sentence.strip()
-        for sentence in re.split(r"(?<=[.!?])(?:\s+|$)|\n+", text.strip())
+        for sentence in re.split(r"(?<=[.!?])(?:\s+|$)|\n+", normalized_text)
         if sentence.strip()
     ]
     if not 2 <= len(sentences) <= 4:
@@ -68,11 +78,34 @@ def _agent_response_is_valid(text: str, evidence: list[Evidence]) -> bool:
             return False
 
         claim_without_citations = re.sub(r"\[E\d+\]", "", sentence)
+        claim_without_citations = _KOREAN_DATE.sub(
+            lambda match: f"{int(match.group(1)):04d}-{int(match.group(2)):02d}-{int(match.group(3)):02d}",
+            claim_without_citations,
+        )
+        claim_without_citations = _SHORT_DATE_RANGE.sub(
+            lambda match: (
+                f"{match.group(1)}-{match.group(2)}-{match.group(3)}~"
+                f"{match.group(1)}-{match.group(4)}-{match.group(5)}"
+            ),
+            claim_without_citations,
+        )
         claim_values = set(_NUMBER_OR_DATE.findall(claim_without_citations))
         source_text = " ".join(evidence_by_id[evidence_id].statement for evidence_id in cited_ids)
         source_values = set(_NUMBER_OR_DATE.findall(source_text))
+        for evidence_id in cited_ids:
+            source_dates = evidence_by_id[evidence_id].source_dates
+            if source_dates:
+                source_values.add(str(len(set(source_dates))))
         if not claim_values <= source_values:
             return False
+
+        for item in evidence:
+            if item.kind != "change" or not item.metric:
+                continue
+            label = METRICS[item.metric][0]
+            asserts_change = "증가" in sentence or "감소" in sentence
+            if label in sentence and asserts_change and item.id not in cited_ids:
+                return False
 
     return True
 
@@ -87,7 +120,8 @@ def _run_tool_agent(
     question: str,
     evidence: list[Evidence],
     settings: Settings,
-) -> tuple[str, list[ToolTrace]]:
+) -> tuple[str, list[ToolTrace], AgentUsage]:
+    started_at = perf_counter()
     client = OpenAI(api_key=settings.openai_api_key)
     evidence_catalog = json.dumps(
         [{"id": item.id, "statement": item.statement} for item in evidence],
@@ -104,12 +138,23 @@ def _run_tool_agent(
         tools=TOOL_DEFINITIONS,
         max_output_tokens=settings.agent_max_output_tokens,
     )
+    api_requests = 1
+    input_tokens = response.usage.input_tokens if response.usage else 0
+    output_tokens = response.usage.output_tokens if response.usage else 0
     trace: list[ToolTrace] = []
     calls_used = 0
     while calls_used < settings.agent_max_steps:
         calls = [item for item in response.output if item.type == "function_call"]
         if not calls:
-            return response.output_text, trace
+            usage = AgentUsage(
+                api_requests=api_requests,
+                tool_calls=len(trace),
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                total_tokens=input_tokens + output_tokens,
+                latency_ms=round((perf_counter() - started_at) * 1000),
+            )
+            return response.output_text, trace, usage
         outputs = []
         for call in calls:
             if calls_used >= settings.agent_max_steps:
@@ -127,7 +172,19 @@ def _run_tool_agent(
             tools=TOOL_DEFINITIONS,
             max_output_tokens=settings.agent_max_output_tokens,
         )
-    return response.output_text, trace
+        api_requests += 1
+        if response.usage:
+            input_tokens += response.usage.input_tokens
+            output_tokens += response.usage.output_tokens
+    usage = AgentUsage(
+        api_requests=api_requests,
+        tool_calls=len(trace),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        total_tokens=input_tokens + output_tokens,
+        latency_ms=round((perf_counter() - started_at) * 1000),
+    )
+    return response.output_text, trace, usage
 
 
 def investigate(
@@ -146,13 +203,15 @@ def investigate(
         ToolTrace(step=3, tool="compare_periods", summary="행동·환경 지표 동시 비교"),
         ToolTrace(step=4, tool="get_events", summary="변화 시점 주변 이벤트 조회"),
     ]
-    if use_llm and settings.openai_api_key:
+    agent_usage = None
+    if use_llm and settings.openai_api_key and evidence:
         try:
-            agent_text, agent_trace = _run_tool_agent(scenario, question, evidence, settings)
+            agent_text, agent_trace, agent_usage = _run_tool_agent(scenario, question, evidence, settings)
             if _required_tools_were_called(agent_trace) and _agent_response_is_valid(agent_text, evidence):
                 summary = agent_text
                 trace = agent_trace
                 mode = "agent"
+                agent_usage.accepted = True
             else:
                 logger.warning("Agent response failed tool or evidence validation; using deterministic fallback")
         except Exception:
@@ -168,6 +227,7 @@ def investigate(
         changes=changes,
         evidence=evidence,
         tool_trace=trace,
+        agent_usage=agent_usage,
         limitations=[
             "이 결과는 합성 기록에서 관찰된 동시 변화를 설명하며 인과관계나 질병을 판단하지 않습니다.",
             "Baseline은 시나리오의 초기 30일, 비교 기간은 마지막 7일입니다.",

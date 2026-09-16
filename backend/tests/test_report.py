@@ -12,11 +12,20 @@ def test_report_links_claims_to_evidence_without_api_key() -> None:
     )
 
     assert report.mode == "deterministic_fallback"
+    assert report.agent_usage is None
     assert report.evidence
     assert all(f"[{item.id}]" in report.summary for item in report.evidence[:3])
     assert "긁기가" in report.summary
     assert "분으로" in report.summary
     assert "인과관계" in report.limitations[0]
+    assert all(
+        evidence.start_date == change.start_date
+        for evidence, change in zip(
+            [item for item in report.evidence if item.kind == "change"],
+            report.changes,
+            strict=True,
+        )
+    )
 
 
 def test_no_change_report_is_explicit() -> None:

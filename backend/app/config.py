@@ -1,6 +1,11 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+PROJECT_DIR = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
@@ -15,7 +20,10 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 10
     allowed_origins: str = "http://localhost:5173"
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(PROJECT_DIR / ".env", BACKEND_DIR / ".env"),
+        extra="ignore",
+    )
 
     @property
     def origins(self) -> list[str]:

@@ -1,0 +1,25 @@
+{
+  "measured_at": "2026-09-16",
+  "model": "gpt-5.6-luna",
+  "changed_scenario_samples": 4,
+  "agent_responses_accepted": 4,
+  "acceptance_rate": 1.0,
+  "tool_call_success_rate": 1.0,
+  "api_requests_per_investigation": 2,
+  "tool_calls_per_investigation": 4,
+  "average_latency_ms": 6566,
+  "average_input_tokens": 2292,
+  "average_output_tokens": 312,
+  "average_total_tokens": 2604,
+  "estimated_cost_usd_per_investigation": 0.000833,
+  "stable_scenario_skipped_api": true,
+  "pricing_assumption_usd_per_million_tokens": {
+    "input": 0.2,
+    "output": 1.2
+  },
+  "notes": [
+    "This is a small live sample and model output remains stochastic.",
+    "The no-change scenario uses the deterministic report without an API call.",
+    "Cost excludes any future pricing changes and infrastructure costs."
+  ]
+}

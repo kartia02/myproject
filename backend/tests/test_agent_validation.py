@@ -41,6 +41,67 @@ def test_agent_response_rejects_unsupported_numbers_and_causal_claims() -> None:
     assert not _agent_response_is_valid(causal_claim, evidence)
 
 
+def test_agent_response_accepts_korean_date_equivalent_to_iso_evidence() -> None:
+    report = investigate(
+        get_scenario("night-restlessness"),
+        "최근 변화가 있어?",
+        use_llm=False,
+        settings=Settings(openai_api_key=None),
+    )
+    event = next(item for item in report.evidence if item.kind == "event")
+    text = (
+        f"{event.start_date.year}년 {event.start_date.month}월 {event.start_date.day}일에 기록이 있습니다. [{event.id}] "
+        f"같은 날짜의 관찰 기록입니다. [{event.id}]"
+    )
+
+    assert _agent_response_is_valid(text, report.evidence)
+
+
+def test_agent_response_accepts_abbreviated_date_range_and_supported_period_count() -> None:
+    report = investigate(
+        get_scenario("rainy-slowdown"),
+        "최근 변화가 있어?",
+        use_llm=False,
+        settings=Settings(openai_api_key=None),
+    )
+    change = report.evidence[0]
+    text = (
+        f"최근 7일(2026-08-23~08-29) {change.statement.split('이 ', 1)[0]}이 달라졌습니다. [{change.id}] "
+        f"해당 기간의 관찰 결과입니다. [{change.id}]"
+    )
+
+    assert _agent_response_is_valid(text, report.evidence)
+
+
+def test_agent_response_requires_evidence_for_each_named_change() -> None:
+    report = investigate(
+        get_scenario("rainy-slowdown"),
+        "최근 변화가 있어?",
+        use_llm=False,
+        settings=Settings(openai_api_key=None),
+    )
+    event = next(item for item in report.evidence if item.kind == "event")
+    unsupported = (
+        f"활동 시간과 저녁 산책 감소가 같은 시기에 나타났습니다. [{event.id}] "
+        f"{event.statement}입니다. [{event.id}]"
+    )
+
+    assert not _agent_response_is_valid(unsupported, report.evidence)
+
+
+def test_event_can_name_metric_without_claiming_detected_change() -> None:
+    report = investigate(
+        get_scenario("night-restlessness"),
+        "최근 변화가 있어?",
+        use_llm=False,
+        settings=Settings(openai_api_key=None),
+    )
+    event = next(item for item in report.evidence if item.kind == "event")
+    text = f"{event.statement} [{event.id}]\n같은 시기의 관찰 기록입니다. [{event.id}]"
+
+    assert _agent_response_is_valid(text, report.evidence)
+
+
 def test_agent_mode_requires_each_investigation_tool_exactly_once() -> None:
     complete = [
         ToolTrace(step=1, tool="get_baseline", summary="done"),

@@ -78,6 +78,16 @@ class ToolTrace(BaseModel):
     summary: str
 
 
+class AgentUsage(BaseModel):
+    api_requests: int
+    tool_calls: int
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+    latency_ms: int
+    accepted: bool = False
+
+
 class InvestigationRequest(BaseModel):
     scenario_id: str
     question: str = Field(min_length=2, max_length=300)
@@ -94,6 +104,7 @@ class InvestigationReport(BaseModel):
     changes: list[ChangeFinding]
     evidence: list[Evidence]
     tool_trace: list[ToolTrace]
+    agent_usage: AgentUsage | None = None
     limitations: list[str]
 
 

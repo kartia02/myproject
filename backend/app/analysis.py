@@ -217,12 +217,13 @@ def build_evidence(
                 id=f"E{index}",
                 kind="change",
                 statement=(
-                    f"{_subject(change.label)} {start.isoformat()}~{end.isoformat()}에 "
+                    f"{_subject(change.label)} {change.start_date.isoformat()}부터 변화 기준을 충족했고, "
+                    f"{start.isoformat()}~{end.isoformat()}에 "
                     f"Baseline {change.baseline_mean}{change.unit}에서 {change.comparison_mean}{change.unit}"
                     f"{_direction_particle(change.unit)} {percent} {verb}"
                 ),
                 metric=change.metric,
-                start_date=start,
+                start_date=change.start_date,
                 end_date=end,
                 baseline_value=change.baseline_mean,
                 observed_value=change.comparison_mean,
