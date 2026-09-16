@@ -17,36 +17,66 @@
 
 ## 로컬 실행
 
-Docker가 설치되어 있으면 다음과 같이 전체 서비스를 실행합니다.
+### 1. 환경변수 준비
+
+저장소 루트에 `.env`를 만들고 OpenAI API Key와 DB 주소를 설정합니다. `.env`는 Git에 포함되지 않습니다.
+
+```env
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.6-luna
+DATABASE_URL=postgresql://USER:PASSWORD@ep-...-pooler....neon.tech/neondb?sslmode=require&channel_binding=require
+```
+
+Neon 없이 화면만 확인하려면 `DATABASE_URL=sqlite:///./pet_detective.db`를 사용할 수 있습니다. `OPENAI_API_KEY`가 비어 있으면 Luna 대신 계산된 Evidence를 사용하는 안전한 리포트를 반환합니다.
+
+### 2. Backend 실행
+
+PowerShell 터미널에서 다음 명령을 실행합니다.
+
+```powershell
+cd D:\MyProject\backend
+python -m pip install -r requirements-dev.txt
+python check_database.py
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+`check_database.py`가 `Database connection OK`를 출력하면 Neon 인증과 SQL 실행이 정상입니다. Backend 시작 시 필요한 테이블을 만들고 Synthetic Scenario 3종과 180개의 일별 기록을 동기화합니다.
+
+### 3. Frontend 실행
+
+새 PowerShell 터미널을 열어 실행합니다.
+
+```powershell
+cd D:\MyProject\frontend
+npm install
+npm run dev -- --host 127.0.0.1
+```
+
+웹은 `http://127.0.0.1:5173`, API 문서는 `http://127.0.0.1:8000/docs`에서 확인합니다. Vite 개발 서버가 `/api` 요청을 Backend로 전달합니다.
+
+### 4. 화면에서 직접 확인
+
+1. 보리 시나리오에서 야간 각성·긁기 증가와 저녁 산책 감소를 확인합니다.
+2. 몽이 시나리오에서 활동 시간·저녁 산책 감소와 강수 이벤트를 확인합니다.
+3. 두부 시나리오에서 뚜렷한 변화가 없다는 결과를 확인합니다.
+4. 변화가 있는 시나리오의 결과 배지가 `GPT-5.6 Luna`인지 확인합니다.
+5. Neon Console에서 `investigation_runs` 행이 추가됐는지 확인합니다.
+
+서버를 종료할 때는 각 터미널에서 `Ctrl+C`를 누릅니다.
+
+### Docker Compose 실행
+
+Docker가 설치된 환경에서는 로컬 PostgreSQL을 포함한 전체 서비스를 실행할 수 있습니다.
 
 ```bash
-cp .env.example .env
 docker compose up --build
 ```
 
-웹은 `http://localhost:8080`, API 문서는 `http://localhost:8000/docs`에서 확인할 수 있습니다. `OPENAI_API_KEY`가 비어 있으면 동일한 분석 결과를 규칙 기반 Evidence 리포트로 제공합니다.
-
-Docker 없이 개발할 때는 Backend와 Frontend를 각각 실행합니다.
-
-```bash
-cd backend
-python -m pip install -r requirements-dev.txt
-uvicorn app.main:app --reload
-```
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-기본 개발 DB는 SQLite이며 Docker 환경에서는 PostgreSQL을 사용합니다.
-
-운영 PostgreSQL은 Neon을 사용합니다. Neon pooled connection string 설정과 검증 절차는 [Neon 연결 문서](docs/neon-setup.md)를 따릅니다.
+이 경우 웹은 `http://localhost:8080`, API 문서는 `http://localhost:8000/docs`에서 확인합니다. 운영 PostgreSQL은 Neon을 사용하며 세부 설정은 [Neon 연결 문서](docs/neon-setup.md)를 따릅니다.
 
 ## 검증
 
-```bash
+```powershell
 cd backend
 pytest
 cd ../evaluation
