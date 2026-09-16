@@ -53,9 +53,10 @@ def scenario_detail(scenario_id: str) -> ScenarioDetail:
     dependencies=[Depends(enforce_rate_limit)],
 )
 def run_investigation(payload: InvestigationRequest) -> InvestigationReport:
-    if load_scenario(payload.scenario_id) is None:
+    scenario = load_scenario(payload.scenario_id)
+    if scenario is None:
         raise HTTPException(status_code=404, detail="시나리오를 찾을 수 없습니다.")
-    report = investigate(payload.scenario_id, payload.question, payload.use_llm, settings)
+    report = investigate(scenario, payload.question, payload.use_llm, settings)
     save_investigation(
         payload.scenario_id,
         payload.question,

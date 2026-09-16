@@ -42,8 +42,16 @@ export default function App() {
 
   useEffect(() => {
     if (!selectedId) return;
+    const controller = new AbortController();
     setReport(null);
-    api.scenario(selectedId).then(setDetail).catch((err: Error) => setError(err.message));
+    setDetail(null);
+    setError("");
+    api.scenario(selectedId, controller.signal)
+      .then(setDetail)
+      .catch((err: Error) => {
+        if (err.name !== "AbortError") setError(err.message);
+      });
+    return () => controller.abort();
   }, [selectedId]);
 
   const recentMetrics = useMemo(() => {

@@ -1,5 +1,25 @@
+from datetime import date, timedelta
+
+import pytest
+
 from app.analysis import BASELINE_DAYS, COMPARISON_DAYS, calculate_baseline, detect_changes
+from app.schemas import DailyRecord
 from app.synthetic import get_scenario
+
+
+def record(day: int, activity: float) -> DailyRecord:
+    return DailyRecord(
+        date=date(2026, 1, 1) + timedelta(days=day),
+        activity_minutes=activity,
+        sleep_hours=10 + day % 2,
+        night_awakenings=1 + day % 2,
+        meal_grams=200 + day % 2,
+        evening_walk_minutes=40 + day % 2,
+        scratching_count=3 + day % 2,
+        barking_count=5 + day % 2,
+        temperature_c=20,
+        precipitation_mm=0,
+    )
 
 
 def test_baseline_uses_fixed_initial_period() -> None:
@@ -29,3 +49,31 @@ def test_detects_rainy_activity_slowdown() -> None:
 
     assert ("activity_minutes", "decrease") in detected
     assert ("evening_walk_minutes", "decrease") in detected
+
+
+def test_detects_change_after_constant_baseline() -> None:
+    records = [record(day, 10 if day < BASELINE_DAYS else 20) for day in range(37)]
+
+    changes = detect_changes(records)
+
+    activity = next(item for item in changes if item.metric == "activity_minutes")
+    assert activity.direction == "increase"
+    assert activity.effect_size == 1.5
+
+
+def test_start_date_is_first_changed_day_in_qualifying_window() -> None:
+    records = [record(day, 10 + day % 2) for day in range(BASELINE_DAYS)]
+    records.extend(record(day, 10.5 if day == BASELINE_DAYS else 20) for day in range(30, 37))
+
+    activity = next(item for item in detect_changes(records) if item.metric == "activity_minutes")
+
+    assert activity.start_date == date(2026, 2, 1)
+
+
+def test_analysis_sorts_records_and_rejects_duplicate_dates() -> None:
+    scenario = get_scenario("night-restlessness")
+    reversed_records = list(reversed(scenario.records))
+    assert detect_changes(reversed_records) == detect_changes(scenario.records)
+
+    with pytest.raises(ValueError, match="one record per date"):
+        detect_changes(scenario.records + [scenario.records[-1]])

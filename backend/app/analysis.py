@@ -40,7 +40,16 @@ def _values(records: list[DailyRecord], metric: str) -> np.ndarray:
     return np.asarray([float(getattr(record, metric)) for record in records], dtype=float)
 
 
+def _normalized_records(records: list[DailyRecord]) -> list[DailyRecord]:
+    ordered = sorted(records, key=lambda record: record.date)
+    dates = [record.date for record in ordered]
+    if len(dates) != len(set(dates)):
+        raise ValueError("Daily records must contain at most one record per date")
+    return ordered
+
+
 def calculate_baseline(records: list[DailyRecord]) -> list[BaselineMetric]:
+    records = _normalized_records(records)
     baseline_records = records[:BASELINE_DAYS]
     if len(baseline_records) < BASELINE_DAYS:
         return []
@@ -73,13 +82,22 @@ def _estimate_start_date(
             break
         values = _values(window, metric)
         if direction == "increase" and int((values > baseline_mean + baseline_std).sum()) >= 3:
-            return window[0].date
+            return next(
+                record.date
+                for record in window
+                if float(getattr(record, metric)) > baseline_mean + baseline_std
+            )
         if direction == "decrease" and int((values < baseline_mean - baseline_std).sum()) >= 3:
-            return window[0].date
+            return next(
+                record.date
+                for record in window
+                if float(getattr(record, metric)) < baseline_mean - baseline_std
+            )
     return records[-COMPARISON_DAYS].date
 
 
 def detect_changes(records: list[DailyRecord]) -> list[ChangeFinding]:
+    records = _normalized_records(records)
     if len(records) < BASELINE_DAYS + COMPARISON_DAYS:
         return []
     baseline_records = records[:BASELINE_DAYS]
@@ -94,16 +112,27 @@ def detect_changes(records: list[DailyRecord]) -> list[ChangeFinding]:
         baseline_std = float(baseline.std(ddof=1))
         difference = comparison_mean - baseline_mean
         direction = "increase" if difference >= 0 else "decrease"
-        effect_size = abs(difference) / baseline_std if baseline_std > 0 else None
+        if baseline_std > 0:
+            effect_size = abs(difference) / baseline_std
+        elif difference != 0:
+            # A perfectly constant baseline has no finite standardized effect size.
+            # Treat a sustained departure as meeting the minimum effect threshold.
+            effect_size = MIN_EFFECT_SIZE
+        else:
+            effect_size = None
         percent_change = difference / baseline_mean * 100 if baseline_mean != 0 else None
         threshold = baseline_mean + baseline_std if direction == "increase" else baseline_mean - baseline_std
         changed_days = int((comparison > threshold).sum() if direction == "increase" else (comparison < threshold).sum())
-        relative_change = abs(percent_change or 0) / 100
+        relative_change_is_large = (
+            abs(percent_change) / 100 >= minimum_percent
+            if percent_change is not None
+            else difference != 0
+        )
 
         if (
             effect_size is None
             or effect_size < MIN_EFFECT_SIZE
-            or relative_change < minimum_percent
+            or not relative_change_is_large
             or changed_days < MIN_CHANGED_DAYS
         ):
             continue
@@ -130,6 +159,7 @@ def detect_changes(records: list[DailyRecord]) -> list[ChangeFinding]:
 
 
 def compare_periods(records: list[DailyRecord], metrics: list[str] | None = None) -> list[dict]:
+    records = _normalized_records(records)
     if len(records) < BASELINE_DAYS + COMPARISON_DAYS:
         return []
     requested = metrics or list(METRICS) + list(ENVIRONMENT_METRICS)
@@ -160,6 +190,7 @@ def compare_periods(records: list[DailyRecord], metrics: list[str] | None = None
 def build_evidence(
     records: list[DailyRecord], changes: list[ChangeFinding], events: list[PetEvent]
 ) -> list[Evidence]:
+    records = _normalized_records(records)
     if not records:
         return []
     comparison = records[-COMPARISON_DAYS:]
@@ -188,7 +219,7 @@ def build_evidence(
         )
     next_index = len(evidence) + 1
     investigation_start = min((change.start_date for change in changes), default=start) - timedelta(days=2)
-    for event in events:
+    for event in sorted(events, key=lambda item: item.date):
         if investigation_start <= event.date <= end:
             evidence.append(
                 Evidence(

@@ -1,0 +1,169 @@
+{"category": "exact", "detail": null, "fenced": false, "id": "2148", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2347", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0038", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2299", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2390", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1630", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1300", "layer": "simple"}
+{"category": "missed_refusal", "detail": "log_medication", "fenced": false, "id": "0938", "layer": "out_of_scope"}
+{"category": "parameter_error", "detail": "amount", "fenced": false, "particle_only": false, "id": "1598", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1716", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0107", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1245", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1284", "layer": "simple"}
+{"category": "wrong_tool", "detail": "get_records != get_vet_summary", "fenced": false, "id": "1989", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2225", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2135", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1018", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0071", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0131", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1965", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1682", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1052", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0792", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0004", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0069", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0680", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0775", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0434", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2005", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0109", "layer": "confusion"}
+{"category": "parameter_error", "detail": "caregiver", "fenced": false, "particle_only": false, "id": "1332", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1863", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0276", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1169", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1430", "layer": "simple"}
+{"category": "parameter_error", "detail": "reason: ambiguous != out_of_scope", "fenced": false, "id": "1010", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0643", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1768", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1099", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1144", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2289", "layer": "multi"}
+{"category": "parameter_error", "detail": "time", "fenced": false, "particle_only": false, "id": "1825", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2283", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1625", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0128", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1132", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0338", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2357", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0852", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2136", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1953", "layer": "multi"}
+{"category": "parameter_error", "detail": "caregiver", "fenced": false, "particle_only": false, "id": "1772", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1206", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0460", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1624", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2377", "layer": "multi"}
+{"category": "parameter_error", "detail": "symptom", "fenced": false, "particle_only": false, "id": "0509", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0439", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0344", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2335", "layer": "multi"}
+{"category": "parameter_error", "detail": "until", "fenced": false, "particle_only": false, "id": "0098", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0645", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0353", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2125", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0272", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0970", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0623", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2359", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0208", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0922", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1305", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2295", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1452", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1641", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1005", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1888", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0547", "layer": "confusion"}
+{"category": "parameter_error", "detail": "since,until", "fenced": false, "particle_only": false, "id": "0693", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2182", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0895", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2149", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1508", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2317", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0290", "layer": "confusion"}
+{"category": "parameter_error", "detail": "amount", "fenced": false, "particle_only": false, "id": "1381", "layer": "simple"}
+{"category": "parameter_error", "detail": "time", "fenced": false, "particle_only": false, "id": "1357", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1049", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0908", "layer": "tense"}
+{"category": "parameter_error", "detail": "until", "fenced": false, "particle_only": false, "id": "0203", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1843", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1564", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1468", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0292", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0382", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1326", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0244", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2229", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1351", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0296", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1093", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1992", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2219", "layer": "multi"}
+{"category": "parameter_error", "detail": "caregiver", "fenced": false, "particle_only": false, "id": "2378", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0235", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1012", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0298", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0090", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2020", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2132", "layer": "multi"}
+{"category": "parameter_error", "detail": "caregiver", "fenced": false, "particle_only": false, "id": "1525", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2032", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2055", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1324", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1075", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0399", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0778", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1014", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1496", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0275", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2049", "layer": "multi"}
+{"category": "parameter_error", "detail": "until", "fenced": false, "particle_only": false, "id": "0889", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0030", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1202", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1649", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2061", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0226", "layer": "confusion"}
+{"category": "wrong_tool", "detail": "log_symptom != log_excretion", "fenced": false, "id": "0598", "layer": "confusion"}
+{"category": "parameter_error", "detail": "food", "fenced": false, "particle_only": false, "id": "1246", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0798", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0089", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1196", "layer": "ambiguous"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0055", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2279", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0917", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0857", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1942", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0508", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2253", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2144", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1688", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0774", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1701", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2036", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0848", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1471", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0320", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0046", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1534", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0644", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1847", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2386", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1565", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2271", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0070", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2026", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1363", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0563", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "2196", "layer": "multi"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1309", "layer": "simple"}
+{"category": "wrong_tool", "detail": "log_symptom != log_care", "fenced": false, "id": "1767", "layer": "multi"}
+{"category": "parameter_error", "detail": "activity_type", "fenced": false, "particle_only": false, "id": "1219", "layer": "simple"}
+{"category": "parameter_error", "detail": "until", "fenced": false, "particle_only": false, "id": "0724", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1414", "layer": "simple"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0872", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1844", "layer": "multi"}
+{"category": "parameter_error", "detail": "record_type,since,until", "fenced": false, "particle_only": false, "id": "0321", "layer": "confusion"}
+{"category": "exact", "detail": null, "fenced": false, "id": "0885", "layer": "tense"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1076", "layer": "out_of_scope"}
+{"category": "exact", "detail": null, "fenced": false, "id": "1131", "layer": "ambiguous"}

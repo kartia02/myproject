@@ -1,15 +1,26 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 
 from openai import OpenAI
 
 from .analysis import build_evidence, detect_changes
 from .config import Settings
-from .schemas import Evidence, InvestigationReport, ToolTrace
-from .synthetic import get_scenario
+from .schemas import Evidence, InvestigationReport, ScenarioDetail, ToolTrace
 from .tools import TOOL_DEFINITIONS, execute_tool_json
+
+
+logger = logging.getLogger(__name__)
+
+_NUMBER_OR_DATE = re.compile(r"\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?%?")
+_FORBIDDEN_ASSERTIONS = (
+    re.compile(r"(?:원인|이유)(?:이|가|으로)?\s*(?:다|입니다)"),
+    re.compile(r"때문에[^.?!]*(?:증가|감소|변화)"),
+    re.compile(r"(?:질병|병명)[^.?!]*(?:이다|입니다)"),
+    re.compile(r"진단(?:했|할 수 있|됩니다|입니다)"),
+)
 
 
 AGENT_INSTRUCTIONS = """
@@ -30,21 +41,43 @@ def _fallback_text(changes, evidence: list[Evidence]) -> tuple[str, str]:
     primary = changes[0]
     verb = "증가" if primary.direction == "increase" else "감소"
     headline = f"최근 가장 큰 변화는 {primary.label} {verb}입니다."
-    parts = [e.statement + f" [{e.id}]" for e in evidence[:3]]
+    parts = [e.statement + f" [{e.id}]" for e in evidence if e.kind == "change"]
     event = next((e for e in evidence if e.kind == "event"), None)
     if event:
         parts.append(f"{event.statement}; 같은 시기의 기록이지만 원인으로 판단할 수는 없습니다. [{event.id}]")
     return headline, " ".join(parts)
 
 
-def _citations_are_valid(text: str, evidence: list[Evidence]) -> bool:
-    cited = set(re.findall(r"\[(E\d+)\]", text))
-    valid = {item.id for item in evidence}
-    return bool(cited) and cited <= valid
+def _agent_response_is_valid(text: str, evidence: list[Evidence]) -> bool:
+    evidence_by_id = {item.id: item for item in evidence}
+    if not text.strip() or any(pattern.search(text) for pattern in _FORBIDDEN_ASSERTIONS):
+        return False
+
+    sentences = [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])(?:\s+|$)|\n+", text.strip())
+        if sentence.strip()
+    ]
+    if not 2 <= len(sentences) <= 4:
+        return False
+
+    for sentence in sentences:
+        cited_ids = set(re.findall(r"\[(E\d+)\]", sentence))
+        if not cited_ids or not cited_ids <= evidence_by_id.keys():
+            return False
+
+        claim_without_citations = re.sub(r"\[E\d+\]", "", sentence)
+        claim_values = set(_NUMBER_OR_DATE.findall(claim_without_citations))
+        source_text = " ".join(evidence_by_id[evidence_id].statement for evidence_id in cited_ids)
+        source_values = set(_NUMBER_OR_DATE.findall(source_text))
+        if not claim_values <= source_values:
+            return False
+
+    return True
 
 
 def _run_tool_agent(
-    scenario_id: str,
+    scenario: ScenarioDetail,
     question: str,
     evidence: list[Evidence],
     settings: Settings,
@@ -59,7 +92,7 @@ def _run_tool_agent(
         reasoning={"effort": settings.agent_reasoning_effort},
         instructions=AGENT_INSTRUCTIONS,
         input=(
-            f"scenario_id={scenario_id}\n사용자 질문: {question}\n"
+            f"조사 대상: {scenario.scenario.dog_name}\n사용자 질문: {question}\n"
             f"서버가 검증한 Evidence 목록: {evidence_catalog}"
         ),
         tools=TOOL_DEFINITIONS,
@@ -75,7 +108,7 @@ def _run_tool_agent(
         for call in calls:
             if calls_used >= settings.agent_max_steps:
                 break
-            output = execute_tool_json(call.name, call.arguments)
+            output = execute_tool_json(call.name, call.arguments, scenario)
             calls_used += 1
             trace.append(ToolTrace(step=calls_used, tool=call.name, summary=f"{call.name} 조회 완료"))
             outputs.append({"type": "function_call_output", "call_id": call.call_id, "output": output})
@@ -91,8 +124,12 @@ def _run_tool_agent(
     return response.output_text, trace
 
 
-def investigate(scenario_id: str, question: str, use_llm: bool, settings: Settings) -> InvestigationReport:
-    scenario = get_scenario(scenario_id)
+def investigate(
+    scenario: ScenarioDetail,
+    question: str,
+    use_llm: bool,
+    settings: Settings,
+) -> InvestigationReport:
     changes = detect_changes(scenario.records)[:3]
     evidence = build_evidence(scenario.records, changes, scenario.events)
     headline, summary = _fallback_text(changes, evidence)
@@ -105,16 +142,18 @@ def investigate(scenario_id: str, question: str, use_llm: bool, settings: Settin
     ]
     if use_llm and settings.openai_api_key:
         try:
-            agent_text, agent_trace = _run_tool_agent(scenario_id, question, evidence, settings)
-            if _citations_are_valid(agent_text, evidence):
+            agent_text, agent_trace = _run_tool_agent(scenario, question, evidence, settings)
+            if _agent_response_is_valid(agent_text, evidence):
                 summary = agent_text
                 trace = agent_trace
                 mode = "agent"
+            else:
+                logger.warning("Agent response failed evidence validation; using deterministic fallback")
         except Exception:
             # The public demo still returns calculated evidence when the model is unavailable.
-            pass
+            logger.exception("Agent investigation failed; using deterministic fallback")
     return InvestigationReport(
-        scenario_id=scenario_id,
+        scenario_id=scenario.scenario.id,
         question=question,
         status="completed" if len(scenario.records) >= 37 else "insufficient_data",
         mode=mode,

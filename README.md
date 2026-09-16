@@ -7,7 +7,7 @@
 - 60일 Synthetic Scenario 3종과 평가 전용 Ground Truth
 - Fixed Personal Baseline과 설명 가능한 변화 탐지
 - `get_baseline`, `detect_changes`, `compare_periods`, `get_events` Tool
-- OpenAI Responses API 기반 Agent 및 Evidence ID 검증
+- OpenAI Responses API 기반 Agent 및 문장별 Evidence·수치·금지 주장 검증
 - API 실패 시에도 동작하는 계산 기반 안전 리포트
 - FastAPI REST API, React Dashboard, PostgreSQL 저장
 - IP 기반 Rate Limit, Agent 최대 4 Step, 출력 토큰 제한

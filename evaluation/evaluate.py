@@ -32,7 +32,12 @@ def main() -> None:
             expected_date = date.fromisoformat(expected_map[key]["start_date"])
             start_errors.append(abs((predicted[key].start_date - expected_date).days))
 
-        report = investigate(scenario_id, "최근 달라진 점이 있어?", False, Settings(openai_api_key=None))
+        report = investigate(
+            get_scenario(scenario_id),
+            "최근 달라진 점이 있어?",
+            False,
+            Settings(openai_api_key=None),
+        )
         evidence_ids = {item.id for item in report.evidence}
         cited_ids = {token.split("]")[0] for token in report.summary.split("[")[1:]}
         total_claims += len(cited_ids)

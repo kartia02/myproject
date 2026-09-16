@@ -13,7 +13,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   scenarios: () => request<Scenario[]>("/api/scenarios"),
-  scenario: (id: string) => request<ScenarioDetail>(`/api/scenarios/${id}`),
+  scenario: (id: string, signal?: AbortSignal) =>
+    request<ScenarioDetail>(`/api/scenarios/${id}`, { signal }),
   investigate: (scenarioId: string, question: string) =>
     request<Report>("/api/investigations", {
       method: "POST",
