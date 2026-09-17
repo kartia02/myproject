@@ -2,6 +2,8 @@
 
 이 문서는 `Pet Detective — 개인 반려견 행동 변화 분석 AI Agent 기획서.md`를 코드 수준으로 구체화한 v1.0 기준이다.
 
+현재의 필수 4-Tool 호출 구조를 질문별 동적 Tool 선택 구조로 전환하는 후속 작업은 [Agent 오케스트레이션 전환 계획](agent-orchestration-plan.md)에 기록한다.
+
 ## 확정 범위
 
 - 사전 생성 Synthetic Scenario 선택형 공개 데모

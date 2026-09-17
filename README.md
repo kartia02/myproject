@@ -13,7 +13,7 @@
 - IP 기반 Rate Limit, Agent 최대 4 Step, 출력 토큰 제한
 - Docker Compose 실행 환경과 정량 평가 스크립트
 
-자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다.
+자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 질문에 따라 Tool을 선택하는 다음 단계는 [Agent 오케스트레이션 전환 계획](docs/agent-orchestration-plan.md)을 따릅니다.
 
 ## 로컬 실행
 
