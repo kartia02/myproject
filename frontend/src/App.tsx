@@ -32,12 +32,23 @@ export default function App() {
   const [question, setQuestion] = useState("최근 우리 강아지에게 달라진 점이 있어?");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [waking, setWaking] = useState(false);
 
   useEffect(() => {
-    api.scenarios().then((items) => {
-      setScenarios(items);
-      if (items[0]) setSelectedId(items[0].id);
-    }).catch((err: Error) => setError(err.message));
+    // 무료 호스팅의 백엔드는 절전 상태일 수 있다. DB를 건드리지 않는 /health로 미리 깨운다.
+    void api.health().catch(() => undefined);
+    const timer = window.setTimeout(() => setWaking(true), 3000);
+    api.scenarios()
+      .then((items) => {
+        setScenarios(items);
+        if (items[0]) setSelectedId(items[0].id);
+      })
+      .catch((err: Error) => setError(err.message))
+      .finally(() => {
+        window.clearTimeout(timer);
+        setWaking(false);
+      });
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -84,6 +95,12 @@ export default function App() {
           <h1>평소와 달라진 순간을<br />기록에서 찾아냅니다.</h1>
           <p className="hero-copy">한 반려견의 지난 기록을 기준으로 최근 변화를 찾고, 같은 시기에 나타난 근거를 조사합니다.</p>
         </section>
+
+        {waking && (
+          <div className="notice" role="status">
+            서버를 깨우는 중입니다. 무료 호스팅을 사용하므로 첫 응답에 최대 1분이 걸릴 수 있습니다.
+          </div>
+        )}
 
         <section className="workspace">
           <aside className="scenario-panel">

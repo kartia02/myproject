@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, JSON, String, Text, create_engine, delete, select
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, JSON, String, Text, create_engine, delete, func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
 from sqlalchemy.pool import StaticPool
 
@@ -13,6 +13,11 @@ from .synthetic import all_scenarios
 
 class Base(DeclarativeBase):
     pass
+
+
+# investigation_runs.mode에 기록하는 값. Agent API를 호출한 조사는 응답이 채택되지 않아도
+# 비용이 발생하므로 agent_rejected로 남기고 일일 총량 상한에 함께 반영한다.
+AGENT_ATTEMPT_MODES = ("agent", "agent_rejected")
 
 
 class ScenarioRow(Base):
@@ -174,6 +179,19 @@ def load_scenario(scenario_id: str) -> ScenarioDetail | None:
             records=[DailyRecord.model_validate(item, from_attributes=True) for item in record_rows],
             events=[PetEvent.model_validate(item, from_attributes=True) for item in event_rows],
         )
+
+
+def count_agent_attempts_since(threshold: datetime) -> int:
+    with Session(engine) as session:
+        total = session.scalar(
+            select(func.count())
+            .select_from(InvestigationRunRow)
+            .where(
+                InvestigationRunRow.mode.in_(AGENT_ATTEMPT_MODES),
+                InvestigationRunRow.created_at >= threshold,
+            )
+        )
+        return int(total or 0)
 
 
 def save_investigation(scenario_id: str, question: str, mode: str, report: dict) -> None:

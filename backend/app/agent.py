@@ -16,6 +16,11 @@ from .tools import TOOL_DEFINITIONS, execute_tool_json
 
 logger = logging.getLogger(__name__)
 
+# SDK 기본 타임아웃은 분 단위로 길다. 측정된 정상 지연이 약 6.5초이므로 짧게 조여서
+# API가 응답하지 않을 때 방문자와 워커 스레드가 오래 묶이지 않게 한다.
+OPENAI_TIMEOUT_SECONDS = 30.0
+OPENAI_MAX_RETRIES = 1
+
 REQUIRED_TOOL_NAMES = frozenset(definition["name"] for definition in TOOL_DEFINITIONS)
 _NUMBER_OR_DATE = re.compile(r"\d{4}-\d{2}-\d{2}|\d+(?:\.\d+)?%?")
 _KOREAN_DATE = re.compile(r"(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일")
@@ -122,7 +127,11 @@ def _run_tool_agent(
     settings: Settings,
 ) -> tuple[str, list[ToolTrace], AgentUsage]:
     started_at = perf_counter()
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = OpenAI(
+        api_key=settings.openai_api_key,
+        timeout=OPENAI_TIMEOUT_SECONDS,
+        max_retries=OPENAI_MAX_RETRIES,
+    )
     evidence_catalog = json.dumps(
         [{"id": item.id, "statement": item.statement} for item in evidence],
         ensure_ascii=False,

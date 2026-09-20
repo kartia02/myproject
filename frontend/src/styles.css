@@ -53,6 +53,7 @@ textarea:focus { border-color: #65836e; box-shadow: 0 0 0 3px rgba(101,131,110,.
 .question-box button span { margin-left: 12px; }.question-box button:disabled { opacity: .6; cursor: wait; }
 .helper { margin: 11px 0 0; color: #7c837e; font-size: 10px; }
 .error { padding: 15px 18px; border: 1px solid #e6b8a3; border-radius: 11px; background: #fff1e9; color: #8c3d1e; font-size: 13px; }
+.notice { margin-bottom: 14px; padding: 13px 18px; border: 1px solid #cfd8cd; border-radius: 11px; background: #f2f6f1; color: #3d5745; font-size: 13px; }
 .report-card { border-color: #9aae9f; background: #f9fbf7; }
 .report-title { display: flex; justify-content: space-between; gap: 20px; }
 .report-title h2 { margin: 0; font-size: 25px; letter-spacing: -.035em; }
