@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     agent_reasoning_effort: str = "low"
     agent_max_steps: int = 4
     agent_max_output_tokens: int = 900
-    agent_daily_call_limit: int = 200
+    agent_daily_call_limit: int = 50
     rate_limit_per_minute: int = 10
     allowed_origins: str = "http://localhost:5173"
 

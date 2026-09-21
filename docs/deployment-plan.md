@@ -9,7 +9,7 @@ Pet Detective 공개 데모를 월 결제금 $0으로 배포한다. 백엔드는
 | Backend | Render Web Service (Docker) | $0 | 15분 유휴 시 절전, 재기동 40~60초 |
 | Frontend | Vercel Hobby | $0 | 정적 CDN, 백엔드 상태와 무관하게 즉시 로드 |
 | Database | Neon PostgreSQL | $0 | 기존 프로젝트 재사용, [Neon 연결 문서](neon-setup.md) |
-| LLM | OpenAI Responses API | 조사 1회 $0.00083 | 일일 상한으로 최대 월 $5 수준 |
+| LLM | OpenAI Responses API | 조사 1회 약 $0.00083 | 초기 일일 상한 50회와 OpenAI 월 한도로 비용 통제 |
 
 프론트엔드와 백엔드는 서로 다른 도메인에 배포한다. 코드가 이미 `VITE_API_BASE_URL`과 `ALLOWED_ORIGINS`로 분리 배포를 전제하므로 추가 구조 변경이 없다. `frontend/Dockerfile`과 `frontend/nginx.conf`는 Docker Compose 로컬 실행 전용으로 남긴다.
 
@@ -50,7 +50,7 @@ def _client_key(request: Request) -> str:
 
 ### 2.3 LLM 호출 일일 총량 상한
 
-`agent_daily_call_limit` 설정을 추가하고 기본값을 200으로 둔다. 상한에 도달하면 `use_llm`이 참이어도 API를 호출하지 않고 `deterministic_fallback` 경로를 사용한다. 이 경로는 `backend/app/agent.py`에 이미 구현되어 있어 방문자에게는 오류가 아니라 정상 응답으로 보인다.
+`agent_daily_call_limit` 설정을 추가하고 기본값을 50으로 둔다. 상한에 도달하면 `use_llm`이 참이어도 API를 호출하지 않고 `deterministic_fallback` 경로를 사용한다. 이 경로는 `backend/app/agent.py`에 이미 구현되어 있어 방문자에게는 오류가 아니라 정상 응답으로 보인다.
 
 카운터는 메모리가 아니라 데이터베이스에서 센다. 1절의 전제 1에 따라 메모리 카운터는 절전마다 0으로 리셋되어 상한 역할을 하지 못한다. `investigation_runs`에서 기준 시각 이후의 Agent 호출 행 수를 세고, 그 값이 상한 이상이면 건너뛴다. 조사 요청 1건당 `SELECT COUNT` 한 번이 늘어난다.
 
@@ -60,7 +60,7 @@ def _client_key(request: Request) -> str:
 
 기준 시각은 KST 자정으로 한다. UTC 자정을 쓰면 한국 시간 오전 9시에 상한이 초기화되어 확인하기 불편하다. 비교는 timezone-aware datetime으로 수행해 SQLite와 PostgreSQL에서 같게 동작하게 한다.
 
-상한 200회는 하루 최대 약 $0.17, 30일 내내 가득 채워도 약 $5다.
+공개 배포의 초기 상한 50회는 측정 평균 기준 하루 약 $0.04, 30일 약 $1.25다. 실제 비용은 토큰 사용량에 따라 달라지므로 OpenAI 측 월 사용 한도를 별도로 둔다.
 
 ### 2.4 OpenAI 클라이언트 타임아웃
 
@@ -208,7 +208,7 @@ npm run build
 | `AGENT_REASONING_EFFORT` | `low` |
 | `AGENT_MAX_STEPS` | `4` |
 | `AGENT_MAX_OUTPUT_TOKENS` | `900` |
-| `AGENT_DAILY_CALL_LIMIT` | `200` |
+| `AGENT_DAILY_CALL_LIMIT` | `50` |
 | `RATE_LIMIT_PER_MINUTE` | `10` |
 | `ALLOWED_ORIGINS` | 8절에서 설정 |
 
@@ -282,6 +282,14 @@ ALLOWED_ORIGINS=https://<project>.vercel.app
 **키가 노출되면 즉시 회전한다.** OpenAI 대시보드에서 기존 키를 폐기하고 새 키를 발급한 뒤 Render 환경변수를 교체한다. Neon 비밀번호도 Console에서 재설정할 수 있다.
 
 **배포 후 README에 공개 URL을 추가한다.** 합성 데이터 데모이며 수의학적 판단을 제공하지 않는다는 경계도 함께 명시한다.
+
+## 10.1 2026-09-21 공개 배포 결과
+
+- Production Frontend: `https://pet-detective-one.vercel.app`
+- Backend API: `https://pet-detective-api.onrender.com`
+- 배포 브랜치: `main`
+- 공개 환경에서 시나리오 3종 조회, Luna 리포트, Evidence 4건, Tool 호출 과정과 Neon 저장을 확인했다.
+- Render의 `ALLOWED_ORIGINS`에는 고정 Production 도메인을 등록한다. `pet-detective-<hash>-<team>.vercel.app` 형식의 배포별 URL은 다른 Origin이므로 CORS에서 차단되는 것이 정상이다.
 
 ## 11. 이후 선택지
 

@@ -15,6 +15,14 @@
 
 자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 질문에 따라 Tool을 선택하는 다음 단계는 [Agent 오케스트레이션 전환 계획](docs/agent-orchestration-plan.md)을 따릅니다.
 
+## 공개 데모
+
+- Frontend: https://pet-detective-one.vercel.app
+- Backend API: https://pet-detective-api.onrender.com
+- API 문서: https://pet-detective-api.onrender.com/docs
+
+2026-09-21 기준으로 Vercel → Render → Neon → Python 변화 분석 → GPT-5.6 Luna Tool Calling 흐름을 공개 환경에서 검증했습니다. Render 무료 인스턴스는 유휴 상태에서 절전되므로 첫 접속에는 약 1분이 걸릴 수 있습니다. Vercel의 배포별 Preview URL은 Render CORS 허용 목록에 없으므로 고정 Production 도메인을 사용합니다.
+
 ## 로컬 실행
 
 ### 1. 환경변수 준비
@@ -90,6 +98,8 @@ npm run build
 평가 결과는 변화 탐지 Precision·Recall·F1, 변화 시작일 오차, 강건성 케이스 통과 수, Evidence Precision, Unsupported Claim Rate를 출력합니다.
 현재 고정 평가 결과는 [`evaluation/results.json`](evaluation/results.json)에 보관합니다. 3개 공개 시나리오와 23개 결정론적 강건성 케이스를 검증하며, 실제 Luna 응답 평가는 API Key 설정 후 별도 실행해야 합니다.
 실제 Luna 표본 결과는 [`evaluation/live_results.json`](evaluation/live_results.json)에 보관합니다. Agent 리포트에는 API 요청 수, Tool 호출 수, 입력·출력 토큰, 지연 시간과 채택 여부가 포함됩니다.
+
+공개 배포에서도 세 시나리오 조회, `GPT-5.6 Luna` 리포트, Evidence 4건, Tool 호출 과정, Neon 조사 기록 저장을 확인했습니다. 운영 설정과 재배포 순서는 [배포 계획](docs/deployment-plan.md)을 따릅니다.
 
 ## API
 
