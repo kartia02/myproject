@@ -195,6 +195,29 @@ function localDateString(): string {
   const offset = now.getTimezoneOffset() * 60_000;
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
+
+function missingRecordDates(records: DailyRecord[], today = localDateString()): string[] {
+  if (!records.length) return [];
+  const savedDates = new Set(records.map((record) => record.date));
+  const firstDate = [...savedDates].sort()[0];
+  if (firstDate > today) return [];
+  const missing: string[] = [];
+  const cursor = new Date(`${firstDate}T00:00:00`);
+  const end = new Date(`${today}T00:00:00`);
+  while (cursor <= end) {
+    const offset = cursor.getTimezoneOffset() * 60_000;
+    const date = new Date(cursor.getTime() - offset).toISOString().slice(0, 10);
+    if (!savedDates.has(date)) missing.push(date);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return missing;
+}
+
+function displayDate(date: string): string {
+  return new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "short" })
+    .format(new Date(`${date}T00:00:00`));
+}
+
 function emptyDraft(): RecordDraft {
   return { date: localDateString(), activity_minutes: 0, sleep_hours: 0, night_awakenings: 0, meal_grams: 0, evening_walk_minutes: 0, scratching_count: 0, barking_count: 0, temperature_c: 20, precipitation_mm: 0, note: "" };
 }
@@ -206,6 +229,7 @@ function PersonalExperience({ workspace, onChange }: { workspace: PersonalWorksp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const records = useMemo(() => [...workspace.records].sort((a, b) => a.date.localeCompare(b.date)), [workspace.records]);
+  const missingDates = useMemo(() => missingRecordDates(records), [records]);
   const recentMetrics = useRecentMetrics(records);
   const ready = records.length >= REQUIRED_RECORDS;
 
@@ -217,7 +241,7 @@ function PersonalExperience({ workspace, onChange }: { workspace: PersonalWorksp
     const nextEvents = workspace.events.filter((item) => item.date !== record.date);
     if (note.trim()) nextEvents.push({ date: record.date, kind: "note", note: note.trim() });
     onChange({ ...workspace, records: nextRecords, events: nextEvents.sort((a, b) => a.date.localeCompare(b.date)) });
-    setDraft({ ...emptyDraft(), date: record.date }); setReport(null);
+    setDraft(emptyDraft()); setReport(null);
   }
   function editRecord(record: DailyRecord) {
     const note = workspace.events.find((item) => item.date === record.date)?.note ?? "";
@@ -226,6 +250,10 @@ function PersonalExperience({ workspace, onChange }: { workspace: PersonalWorksp
   function deleteRecord(date: string) {
     onChange({ ...workspace, records: workspace.records.filter((item) => item.date !== date), events: workspace.events.filter((item) => item.date !== date) });
     setReport(null);
+  }
+  function startMissingRecord(date: string) {
+    setDraft({ ...emptyDraft(), date });
+    document.getElementById("record-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   async function ask() {
     if (!ready || !question.trim()) return;
@@ -242,7 +270,8 @@ function PersonalExperience({ workspace, onChange }: { workspace: PersonalWorksp
       <section className="personal-layout">
         <RecordForm draft={draft} setDraft={setDraft} setNumber={setNumber} onSubmit={saveRecord} />
         <div className="personal-main">
-          <ProgressCard count={records.length} />
+          <ProgressCard count={records.length} missingCount={missingDates.length} />
+          {missingDates.length > 0 && <MissingRecordsCard dates={missingDates} onSelect={startMissingRecord} />}
           {records.length > 0 && <MetricsCard name={workspace.profile.name} records={records} recentMetrics={recentMetrics} />}
           <RecordList records={records} onEdit={editRecord} onDelete={deleteRecord} />
           {ready && <QuestionCard question={question} setQuestion={setQuestion} ask={ask} loading={loading} disabled={false} />}
@@ -263,19 +292,33 @@ function RecordForm({ draft, setDraft, setNumber, onSubmit }: { draft: RecordDra
     { key: "precipitation_mm", label: "강수량", unit: "mm", max: 2000, step: "0.1" }
   ];
   return (
-    <form className="record-form" onSubmit={onSubmit}>
-      <div className="section-heading"><span>01</span><h2>오늘의 기록</h2></div>
-      <label>날짜<input type="date" value={draft.date} onChange={(e) => setDraft((current) => ({ ...current, date: e.target.value }))} required /></label>
+    <form className="record-form" id="record-form" onSubmit={onSubmit}>
+      <div className="section-heading"><span>01</span><h2>{draft.date < localDateString() ? "지난 기록 작성" : "오늘의 기록"}</h2></div>
+      <label>날짜<input type="date" max={localDateString()} value={draft.date} onChange={(e) => setDraft((current) => ({ ...current, date: e.target.value }))} required /></label>
       <div className="record-fields">{numberFields.map((field) => <label key={field.key}>{field.label}<span>{field.unit}</span><input type="number" min={field.min ?? 0} max={field.max} step={field.step ?? "1"} value={Number(draft[field.key])} onChange={(e) => setNumber(field.key, e.target.value)} required /></label>)}</div>
       <label>특이사항 <span>선택</span><textarea value={draft.note} onChange={(e) => setDraft((current) => ({ ...current, note: e.target.value }))} maxLength={300} placeholder="예: 비가 와서 산책을 짧게 함" /></label>
+      {draft.date < localDateString() && <p className="past-record-note">놓친 {displayDate(draft.date)} 기록을 작성하고 있습니다.</p>}
       <button className="primary-button" type="submit">이 날짜 기록 저장</button><p className="helper">같은 날짜를 다시 저장하면 기존 기록을 수정합니다.</p>
     </form>
   );
 }
 
-function ProgressCard({ count }: { count: number }) {
+function ProgressCard({ count, missingCount }: { count: number; missingCount: number }) {
   const progress = Math.min((count / REQUIRED_RECORDS) * 100, 100);
-  return <section className="progress-card"><div><p className="eyebrow">PERSONAL BASELINE</p><h2>{count >= REQUIRED_RECORDS ? "변화 분석 준비가 완료됐습니다." : "평소 기준을 만들고 있습니다."}</h2></div><strong>{count}<small> / {REQUIRED_RECORDS}일</small></strong><div className="progress-track"><span style={{ width: `${progress}%` }} /></div><p>과거 30일과 최근 7일을 비교하므로 날짜가 서로 다른 기록 37개가 필요합니다.</p></section>;
+  return <section className="progress-card"><div><p className="eyebrow">PERSONAL BASELINE</p><h2>{count >= REQUIRED_RECORDS ? "변화 분석 준비가 완료됐습니다." : "평소 기준을 만들고 있습니다."}</h2></div><strong>{count}<small> / {REQUIRED_RECORDS}일</small></strong><div className="progress-track"><span style={{ width: `${progress}%` }} /></div><p>과거 30일과 최근 7일을 비교하므로 날짜가 서로 다른 기록 37개가 필요합니다.{missingCount > 0 && ` 비어 있는 날짜 ${missingCount}개를 아래에서 확인할 수 있습니다.`}</p></section>;
+}
+
+function MissingRecordsCard({ dates, onSelect }: { dates: string[]; onSelect: (date: string) => void }) {
+  const recentMissing = [...dates].reverse().slice(0, 8);
+  return (
+    <section className="missing-records-card" aria-live="polite">
+      <div><p className="eyebrow">MISSING RECORDS</p><h2>작성하지 않은 날짜가 {dates.length}개 있습니다.</h2><p>기억나는 범위에서 보완해 주세요. 누락 기록이 있어도 37개가 모이면 분석은 가능합니다.</p></div>
+      <div className="missing-date-list">
+        {recentMissing.map((date) => <button key={date} onClick={() => onSelect(date)}>{date === localDateString() ? "오늘" : displayDate(date)} <span>작성하기 →</span></button>)}
+      </div>
+      {dates.length > recentMissing.length && <small>가장 최근 날짜부터 8개를 표시합니다. 그 외 {dates.length - recentMissing.length}개가 더 있습니다.</small>}
+    </section>
+  );
 }
 
 function RecordList({ records, onEdit, onDelete }: { records: DailyRecord[]; onEdit: (record: DailyRecord) => void; onDelete: (date: string) => void }) {
