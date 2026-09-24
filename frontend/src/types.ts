@@ -27,6 +27,21 @@ export type ScenarioDetail = {
   events: { date: string; kind: string; note: string }[];
 };
 
+export type ExperienceMode = "sample" | "personal";
+
+export type PetProfile = {
+  name: string;
+  age?: number;
+  breed?: string;
+  mode: ExperienceMode;
+};
+
+export type PersonalWorkspace = {
+  profile: PetProfile;
+  records: DailyRecord[];
+  events: { date: string; kind: string; note: string }[];
+};
+
 export type ChangeFinding = {
   metric: keyof DailyRecord;
   label: string;

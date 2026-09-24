@@ -8,9 +8,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from .agent import investigate
 from .budget import agent_calls_remaining
 from .config import get_settings
-from .database import initialize_database, list_scenarios, load_scenario, save_investigation
+from .database import (
+    PERSONAL_DEMO_SCENARIO_ID,
+    initialize_database,
+    list_scenarios,
+    load_scenario,
+    save_investigation,
+    save_personal_demo_investigation,
+)
 from .rate_limit import enforce_rate_limit
-from .schemas import InvestigationReport, InvestigationRequest, ScenarioDetail, ScenarioSummary
+from .schemas import (
+    InvestigationReport,
+    InvestigationRequest,
+    PersonalInvestigationRequest,
+    ScenarioDetail,
+    ScenarioSummary,
+)
 
 
 # 배포 환경에서는 호스팅 대시보드의 로그가 유일한 디버깅 수단이다. 설정하지 않으면
@@ -50,7 +63,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, version="1.0.0", lifespan=lifespan)
+app = FastAPI(title=settings.app_name, version="1.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins,
@@ -95,15 +108,54 @@ def run_investigation(payload: InvestigationRequest) -> InvestigationReport:
     scenario = load_scenario(payload.scenario_id)
     if scenario is None:
         raise HTTPException(status_code=404, detail="시나리오를 찾을 수 없습니다.")
+    if payload.pet_name:
+        scenario = scenario.model_copy(
+            update={
+                "scenario": scenario.scenario.model_copy(update={"dog_name": payload.pet_name})
+            },
+            deep=True,
+        )
     use_llm = payload.use_llm
     if use_llm and settings.openai_api_key and agent_calls_remaining(settings) <= 0:
         logger.warning("Daily agent call limit reached; serving the calculated report")
         use_llm = False
     report = investigate(scenario, payload.question, use_llm, settings)
-    save_investigation(
-        payload.scenario_id,
-        payload.question,
-        _stored_mode(report),
-        report.model_dump(mode="json"),
+    if payload.pet_name:
+        save_personal_demo_investigation(_stored_mode(report), report.model_dump(mode="json"))
+    else:
+        save_investigation(
+            payload.scenario_id,
+            payload.question,
+            _stored_mode(report),
+            report.model_dump(mode="json"),
+        )
+    return report
+
+
+@app.post(
+    "/api/personal-investigations",
+    response_model=InvestigationReport,
+    dependencies=[Depends(enforce_rate_limit)],
+)
+def run_personal_investigation(payload: PersonalInvestigationRequest) -> InvestigationReport:
+    records = sorted(payload.records, key=lambda item: item.date)
+    scenario = ScenarioDetail(
+        scenario=ScenarioSummary(
+            id=PERSONAL_DEMO_SCENARIO_ID,
+            name=f"{payload.pet_name}의 개인 기록",
+            dog_name=payload.pet_name,
+            description="브라우저에 저장된 개인 기록",
+            start_date=records[0].date,
+            end_date=records[-1].date,
+            days=len(records),
+        ),
+        records=records,
+        events=sorted(payload.events, key=lambda item: item.date),
     )
+    use_llm = payload.use_llm
+    if use_llm and settings.openai_api_key and agent_calls_remaining(settings) <= 0:
+        logger.warning("Daily agent call limit reached; serving the calculated personal report")
+        use_llm = False
+    report = investigate(scenario, payload.question, use_llm, settings)
+    save_personal_demo_investigation(_stored_mode(report), report.model_dump(mode="json"))
     return report

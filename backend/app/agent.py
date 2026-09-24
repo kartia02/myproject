@@ -7,7 +7,7 @@ from time import perf_counter
 
 from openai import OpenAI
 
-from .analysis import build_evidence, detect_changes
+from .analysis import BASELINE_DAYS, COMPARISON_DAYS, build_evidence, detect_changes
 from .config import Settings
 from .metrics import METRICS
 from .schemas import AgentUsage, Evidence, InvestigationReport, ScenarioDetail, ToolTrace
@@ -202,6 +202,27 @@ def investigate(
     use_llm: bool,
     settings: Settings,
 ) -> InvestigationReport:
+    is_personal_demo = scenario.scenario.id == "personal-browser-demo"
+    minimum_records = BASELINE_DAYS + COMPARISON_DAYS
+    if len(scenario.records) < minimum_records:
+        remaining = minimum_records - len(scenario.records)
+        return InvestigationReport(
+            scenario_id=scenario.scenario.id,
+            question=question,
+            status="insufficient_data",
+            mode="deterministic_fallback",
+            headline="Personal Baseline을 만들 기록이 더 필요합니다.",
+            summary=(
+                f"현재 {len(scenario.records)}일의 기록이 있습니다. "
+                f"과거 {BASELINE_DAYS}일과 최근 {COMPARISON_DAYS}일을 비교하려면 "
+                f"{remaining}일의 기록이 더 필요합니다."
+            ),
+            changes=[],
+            evidence=[],
+            tool_trace=[],
+            agent_usage=None,
+            limitations=["기록이 충분해질 때까지 변화 여부를 판단하지 않습니다."],
+        )
     changes = detect_changes(scenario.records)[:3]
     evidence = build_evidence(scenario.records, changes, scenario.events)
     headline, summary = _fallback_text(changes, evidence)
@@ -238,7 +259,11 @@ def investigate(
         tool_trace=trace,
         agent_usage=agent_usage,
         limitations=[
-            "이 결과는 합성 기록에서 관찰된 동시 변화를 설명하며 인과관계나 질병을 판단하지 않습니다.",
+            (
+                "이 결과는 브라우저에서 전달된 기록의 동시 변화를 설명하며 인과관계나 질병을 판단하지 않습니다."
+                if is_personal_demo
+                else "이 결과는 합성 기록에서 관찰된 동시 변화를 설명하며 인과관계나 질병을 판단하지 않습니다."
+            ),
             "Baseline은 시나리오의 초기 30일, 비교 기간은 마지막 7일입니다.",
         ],
     )

@@ -18,6 +18,7 @@ class Base(DeclarativeBase):
 # investigation_runs.mode에 기록하는 값. Agent API를 호출한 조사는 응답이 채택되지 않아도
 # 비용이 발생하므로 agent_rejected로 남기고 일일 총량 상한에 함께 반영한다.
 AGENT_ATTEMPT_MODES = ("agent", "agent_rejected")
+PERSONAL_DEMO_SCENARIO_ID = "personal-browser-demo"
 
 
 class ScenarioRow(Base):
@@ -113,9 +114,11 @@ def initialize_database() -> None:
                     .where(PetEventRow.scenario_id == summary.id)
                     .order_by(PetEventRow.date)
                 ).all()
-                records_match = [
-                    DailyRecord.model_validate(item, from_attributes=True) for item in stored_records
-                ] == detail.records
+                record_fields = tuple(DailyRecord.model_fields)
+                records_match = len(stored_records) == len(detail.records) and all(
+                    all(getattr(stored, field) == getattr(expected, field) for field in record_fields)
+                    for stored, expected in zip(stored_records, detail.records, strict=True)
+                )
                 events_match = [
                     PetEvent.model_validate(item, from_attributes=True) for item in stored_events
                 ] == detail.events
@@ -139,12 +142,28 @@ def initialize_database() -> None:
             session.add_all(
                 [PetEventRow(scenario_id=summary.id, **event.model_dump()) for event in detail.events]
             )
+        if session.get(ScenarioRow, PERSONAL_DEMO_SCENARIO_ID) is None:
+            session.add(
+                ScenarioRow(
+                    id=PERSONAL_DEMO_SCENARIO_ID,
+                    name="브라우저 개인 기록",
+                    dog_name="개인 기록",
+                    description="원본 기록을 저장하지 않는 브라우저 기반 분석",
+                    start_date=date(1970, 1, 1),
+                    end_date=date(1970, 1, 1),
+                    days=0,
+                )
+            )
         session.commit()
 
 
 def list_scenarios() -> list[ScenarioSummary]:
     with Session(engine) as session:
-        rows = session.scalars(select(ScenarioRow).order_by(ScenarioRow.id)).all()
+        rows = session.scalars(
+            select(ScenarioRow)
+            .where(ScenarioRow.id != PERSONAL_DEMO_SCENARIO_ID)
+            .order_by(ScenarioRow.id)
+        ).all()
         return [
             ScenarioSummary(
                 id=row.id,
@@ -205,3 +224,19 @@ def save_investigation(scenario_id: str, question: str, mode: str, report: dict)
             )
         )
         session.commit()
+
+
+def save_personal_demo_investigation(mode: str, report: dict) -> None:
+    """비용 집계에 필요한 실행 메타데이터만 저장하고 사용자 입력은 보관하지 않는다."""
+    usage = report.get("agent_usage")
+    save_investigation(
+        PERSONAL_DEMO_SCENARIO_ID,
+        "[personal demo question not stored]",
+        mode,
+        {
+            "scenario_id": PERSONAL_DEMO_SCENARIO_ID,
+            "status": report.get("status"),
+            "mode": report.get("mode"),
+            "agent_usage": usage,
+        },
+    )

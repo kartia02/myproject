@@ -1,4 +1,4 @@
-import type { Report, Scenario, ScenarioDetail } from "./types";
+import type { DailyRecord, Report, Scenario, ScenarioDetail } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -25,10 +25,20 @@ export const api = {
   scenarios: () => request<Scenario[]>("/api/scenarios"),
   scenario: (id: string, signal?: AbortSignal) =>
     request<ScenarioDetail>(`/api/scenarios/${id}`, { signal }),
-  investigate: (scenarioId: string, question: string) =>
+  investigate: (scenarioId: string, question: string, petName?: string) =>
     request<Report>("/api/investigations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scenario_id: scenarioId, question, use_llm: true })
-    })
+      body: JSON.stringify({ scenario_id: scenarioId, question, use_llm: true, pet_name: petName })
+    }),
+  investigatePersonal: (
+    petName: string,
+    records: DailyRecord[],
+    events: { date: string; kind: string; note: string }[],
+    question: string
+  ) => request<Report>("/api/personal-investigations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pet_name: petName, records, events, question, use_llm: true })
+  })
 };
