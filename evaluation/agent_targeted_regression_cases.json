@@ -1,0 +1,31 @@
+[
+  {
+    "id": "targeted-compare-no-redundant-baseline",
+    "split": "confirmation",
+    "scenario_id": "night-restlessness",
+    "category": "comparison",
+    "question": "최근 수면 평균을 평소 평균과 수치로 비교해줘.",
+    "expected_status": "completed",
+    "required_tools": ["compare_periods"],
+    "allowed_tools": ["compare_periods"],
+    "argument_expectations": {"compare_periods": {"metrics": ["sleep_hours"]}},
+    "order_constraints": [],
+    "forbidden_claim_types": ["event", "cause", "diagnosis"]
+  },
+  {
+    "id": "targeted-generic-memo-uses-all",
+    "split": "confirmation",
+    "scenario_id": "night-restlessness",
+    "category": "mixed",
+    "question": "긁기 변화가 시작된 때 주변에 적어 둔 생활 기록이 있는지 찾아줘.",
+    "expected_status": "completed",
+    "required_tools": ["detect_changes", "get_events"],
+    "allowed_tools": ["detect_changes", "get_events"],
+    "argument_expectations": {
+      "detect_changes": {"metrics": ["scratching_count"]},
+      "get_events": {"kinds": ["all"]}
+    },
+    "order_constraints": [["detect_changes", "get_events"]],
+    "forbidden_claim_types": ["cause", "diagnosis"]
+  }
+]

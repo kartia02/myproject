@@ -1,0 +1,883 @@
+{
+  "model": "gpt-5.6-luna",
+  "split": "holdout",
+  "runs_per_case": 3,
+  "samples": 30,
+  "acceptance_rate": 0.967,
+  "scores": {
+    "required_tool_recall": 0.97,
+    "tool_selection_precision": 1.0,
+    "unnecessary_tool_call_rate": 0.0,
+    "exact_tool_set_rate": 0.967,
+    "argument_accuracy": 0.97,
+    "order_accuracy": 1.0,
+    "status_accuracy": 1.0,
+    "duplicate_call_case_rate": 0.0
+  },
+  "average_api_requests": 2.2,
+  "average_latency_ms": 4998,
+  "average_input_tokens": 2983,
+  "average_output_tokens": 181,
+  "estimated_cost_usd_total": 0.02442,
+  "estimated_cost_usd_per_case": 0.000814,
+  "runs": [
+    {
+      "run": 1,
+      "scores": {
+        "dataset": {
+          "cases": 10,
+          "evaluated": 10,
+          "categories": {
+            "baseline": 2,
+            "change": 1,
+            "comparison": 2,
+            "event": 1,
+            "mixed": 2,
+            "no_change": 1,
+            "out_of_scope": 1
+          },
+          "splits": {
+            "holdout": 10
+          }
+        },
+        "required_tool_recall": 1.0,
+        "tool_selection_precision": 1.0,
+        "unnecessary_tool_call_rate": 0.0,
+        "exact_tool_set_rate": 1.0,
+        "argument_accuracy": 1.0,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": []
+      },
+      "samples": [
+        {
+          "case_id": "baseline-sleep-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 1,
+            "input_tokens": 3580,
+            "output_tokens": 202,
+            "total_tokens": 3782,
+            "latency_ms": 6777,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "baseline-multi-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "barking_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2739,
+            "output_tokens": 123,
+            "total_tokens": 2862,
+            "latency_ms": 4679,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-sleep-07",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2602,
+            "output_tokens": 129,
+            "total_tokens": 2731,
+            "latency_ms": 4282,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-meal-08",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2606,
+            "output_tokens": 115,
+            "total_tokens": 2721,
+            "latency_ms": 3998,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-stable-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2658,
+            "output_tokens": 135,
+            "total_tokens": 2793,
+            "latency_ms": 4569,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-bark-meal-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "barking_count",
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2762,
+            "output_tokens": 172,
+            "total_tokens": 2934,
+            "latency_ms": 4306,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-empty-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2674,
+            "output_tokens": 182,
+            "total_tokens": 2856,
+            "latency_ms": 4885,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-stable-events-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2657,
+            "output_tokens": 219,
+            "total_tokens": 2876,
+            "latency_ms": 4587,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-rain-walk-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes",
+                  "precipitation_mm"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-12",
+                "end_date": "2026-08-18",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 3,
+            "input_tokens": 6471,
+            "output_tokens": 358,
+            "total_tokens": 6829,
+            "latency_ms": 8713,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "out-of-scope-medication-03",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1252,
+            "output_tokens": 164,
+            "total_tokens": 1416,
+            "latency_ms": 3306,
+            "accepted": true
+          }
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "scores": {
+        "dataset": {
+          "cases": 10,
+          "evaluated": 10,
+          "categories": {
+            "baseline": 2,
+            "change": 1,
+            "comparison": 2,
+            "event": 1,
+            "mixed": 2,
+            "no_change": 1,
+            "out_of_scope": 1
+          },
+          "splits": {
+            "holdout": 10
+          }
+        },
+        "required_tool_recall": 1.0,
+        "tool_selection_precision": 1.0,
+        "unnecessary_tool_call_rate": 0.0,
+        "exact_tool_set_rate": 1.0,
+        "argument_accuracy": 1.0,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": []
+      },
+      "samples": [
+        {
+          "case_id": "baseline-sleep-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2651,
+            "output_tokens": 94,
+            "total_tokens": 2745,
+            "latency_ms": 3608,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "baseline-multi-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "barking_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2739,
+            "output_tokens": 126,
+            "total_tokens": 2865,
+            "latency_ms": 4028,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-sleep-07",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2618,
+            "output_tokens": 132,
+            "total_tokens": 2750,
+            "latency_ms": 4065,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-meal-08",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2598,
+            "output_tokens": 102,
+            "total_tokens": 2700,
+            "latency_ms": 5205,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-stable-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2665,
+            "output_tokens": 134,
+            "total_tokens": 2799,
+            "latency_ms": 4340,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-bark-meal-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "barking_count",
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2783,
+            "output_tokens": 193,
+            "total_tokens": 2976,
+            "latency_ms": 4450,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-empty-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2677,
+            "output_tokens": 188,
+            "total_tokens": 2865,
+            "latency_ms": 5047,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-stable-events-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2660,
+            "output_tokens": 261,
+            "total_tokens": 2921,
+            "latency_ms": 5359,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-rain-walk-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes",
+                  "precipitation_mm"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-15",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 3,
+            "input_tokens": 6534,
+            "output_tokens": 413,
+            "total_tokens": 6947,
+            "latency_ms": 8953,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "out-of-scope-medication-03",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1252,
+            "output_tokens": 85,
+            "total_tokens": 1337,
+            "latency_ms": 2413,
+            "accepted": true
+          }
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "scores": {
+        "dataset": {
+          "cases": 10,
+          "evaluated": 10,
+          "categories": {
+            "baseline": 2,
+            "change": 1,
+            "comparison": 2,
+            "event": 1,
+            "mixed": 2,
+            "no_change": 1,
+            "out_of_scope": 1
+          },
+          "splits": {
+            "holdout": 10
+          }
+        },
+        "required_tool_recall": 0.909,
+        "tool_selection_precision": 1.0,
+        "unnecessary_tool_call_rate": 0.0,
+        "exact_tool_set_rate": 0.9,
+        "argument_accuracy": 0.909,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": [
+          {
+            "id": "event-empty-04",
+            "failures": [
+              "argument:get_events.kinds",
+              "tool_set"
+            ]
+          }
+        ]
+      },
+      "samples": [
+        {
+          "case_id": "baseline-sleep-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 1,
+            "input_tokens": 3580,
+            "output_tokens": 182,
+            "total_tokens": 3762,
+            "latency_ms": 5139,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "baseline-multi-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "barking_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2739,
+            "output_tokens": 123,
+            "total_tokens": 2862,
+            "latency_ms": 3678,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-sleep-07",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 1,
+            "input_tokens": 3517,
+            "output_tokens": 242,
+            "total_tokens": 3759,
+            "latency_ms": 5942,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-meal-08",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2601,
+            "output_tokens": 119,
+            "total_tokens": 2720,
+            "latency_ms": 4195,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-stable-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2652,
+            "output_tokens": 125,
+            "total_tokens": 2777,
+            "latency_ms": 7194,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-bark-meal-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "barking_count",
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2768,
+            "output_tokens": 184,
+            "total_tokens": 2952,
+            "latency_ms": 4538,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-empty-04",
+          "accepted": false,
+          "status": "completed",
+          "calls": [],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 0,
+            "input_tokens": 2107,
+            "output_tokens": 274,
+            "total_tokens": 2381,
+            "latency_ms": 5783,
+            "accepted": false
+          }
+        },
+        {
+          "case_id": "mixed-stable-events-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2653,
+            "output_tokens": 254,
+            "total_tokens": 2907,
+            "latency_ms": 5464,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-rain-walk-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes",
+                  "precipitation_mm"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-12",
+                "end_date": "2026-08-18",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 3,
+            "input_tokens": 6453,
+            "output_tokens": 337,
+            "total_tokens": 6790,
+            "latency_ms": 8302,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "out-of-scope-medication-03",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1252,
+            "output_tokens": 66,
+            "total_tokens": 1318,
+            "latency_ms": 2141,
+            "accepted": true
+          }
+        }
+      ]
+    }
+  ]
+}

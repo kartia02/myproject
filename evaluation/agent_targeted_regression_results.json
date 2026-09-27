@@ -1,0 +1,111 @@
+{
+  "model": "gpt-5.6-luna",
+  "split": "confirmation",
+  "runs_per_case": 1,
+  "samples": 2,
+  "acceptance_rate": 1.0,
+  "scores": {
+    "required_tool_recall": 1.0,
+    "tool_selection_precision": 1.0,
+    "unnecessary_tool_call_rate": 0.0,
+    "exact_tool_set_rate": 1.0,
+    "argument_accuracy": 1.0,
+    "order_accuracy": 1.0,
+    "status_accuracy": 1.0,
+    "duplicate_call_case_rate": 0.0
+  },
+  "average_api_requests": 2.5,
+  "average_latency_ms": 6102,
+  "average_input_tokens": 3768,
+  "average_output_tokens": 172,
+  "estimated_cost_usd_total": 0.001921,
+  "estimated_cost_usd_per_case": 0.00096,
+  "runs": [
+    {
+      "run": 1,
+      "scores": {
+        "dataset": {
+          "cases": 2,
+          "evaluated": 2,
+          "categories": {
+            "comparison": 1,
+            "mixed": 1
+          },
+          "splits": {
+            "confirmation": 2
+          }
+        },
+        "required_tool_recall": 1.0,
+        "tool_selection_precision": 1.0,
+        "unnecessary_tool_call_rate": 0.0,
+        "exact_tool_set_rate": 1.0,
+        "argument_accuracy": 1.0,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": []
+      },
+      "samples": [
+        {
+          "case_id": "targeted-compare-no-redundant-baseline",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2851,
+            "output_tokens": 126,
+            "total_tokens": 2977,
+            "latency_ms": 5581,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "targeted-generic-memo-uses-all",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "scratching_count"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-02",
+                "end_date": "2026-08-08",
+                "kinds": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 2,
+            "input_tokens": 4684,
+            "output_tokens": 219,
+            "total_tokens": 4903,
+            "latency_ms": 6622,
+            "accepted": true
+          }
+        }
+      ]
+    }
+  ]
+}

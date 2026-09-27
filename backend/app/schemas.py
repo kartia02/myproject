@@ -61,8 +61,9 @@ class ChangeFinding(BaseModel):
 
 class Evidence(BaseModel):
     id: str
-    kind: Literal["change", "comparison", "event"]
+    kind: Literal["baseline", "change", "comparison", "event"]
     statement: str
+    source_tool: str | None = None
     metric: str | None = None
     start_date: date
     end_date: date
@@ -70,12 +71,26 @@ class Evidence(BaseModel):
     observed_value: float | None = None
     unit: str | None = None
     source_dates: list[date] = Field(default_factory=list)
+    values: dict[str, float | str | None] = Field(default_factory=dict)
+
+
+class AgentFinding(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+    evidence_ids: list[str] = Field(min_length=1, max_length=5)
+
+
+class AgentAnswer(BaseModel):
+    status: Literal["completed", "out_of_scope"]
+    headline: str = Field(min_length=1, max_length=160)
+    findings: list[AgentFinding] = Field(default_factory=list, max_length=5)
+    limitations: list[str] = Field(default_factory=list, max_length=3)
 
 
 class ToolTrace(BaseModel):
     step: int
     tool: str
     summary: str
+    arguments: dict = Field(default_factory=dict)
 
 
 class AgentUsage(BaseModel):
@@ -117,7 +132,7 @@ class PersonalInvestigationRequest(BaseModel):
 class InvestigationReport(BaseModel):
     scenario_id: str
     question: str
-    status: Literal["completed", "insufficient_data"]
+    status: Literal["completed", "insufficient_data", "out_of_scope"]
     mode: Literal["agent", "deterministic_fallback"]
     headline: str
     summary: str

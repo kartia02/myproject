@@ -1,0 +1,385 @@
+{
+  "model": "gpt-5.6-luna",
+  "split": "confirmation",
+  "runs_per_case": 1,
+  "samples": 12,
+  "acceptance_rate": 1.0,
+  "scores": {
+    "required_tool_recall": 1.0,
+    "tool_selection_precision": 0.929,
+    "unnecessary_tool_call_rate": 0.071,
+    "exact_tool_set_rate": 0.917,
+    "argument_accuracy": 0.923,
+    "order_accuracy": 1.0,
+    "status_accuracy": 1.0,
+    "duplicate_call_case_rate": 0.0
+  },
+  "average_api_requests": 2.42,
+  "average_latency_ms": 6159,
+  "average_input_tokens": 3412,
+  "average_output_tokens": 220,
+  "estimated_cost_usd_total": 0.011364,
+  "estimated_cost_usd_per_case": 0.000947,
+  "runs": [
+    {
+      "run": 1,
+      "scores": {
+        "dataset": {
+          "cases": 12,
+          "evaluated": 12,
+          "categories": {
+            "baseline": 2,
+            "change": 1,
+            "comparison": 2,
+            "event": 2,
+            "mixed": 2,
+            "no_change": 1,
+            "out_of_scope": 2
+          },
+          "splits": {
+            "confirmation": 12
+          }
+        },
+        "required_tool_recall": 1.0,
+        "tool_selection_precision": 0.929,
+        "unnecessary_tool_call_rate": 0.071,
+        "exact_tool_set_rate": 0.917,
+        "argument_accuracy": 0.923,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": [
+          {
+            "id": "confirm-compare-01",
+            "failures": [
+              "tool_set"
+            ]
+          },
+          {
+            "id": "confirm-mixed-01",
+            "failures": [
+              "argument:get_events.kinds"
+            ]
+          }
+        ]
+      },
+      "samples": [
+        {
+          "case_id": "confirm-baseline-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "night_awakenings"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2731,
+            "output_tokens": 103,
+            "total_tokens": 2834,
+            "latency_ms": 6433,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-baseline-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "scratching_count",
+                  "barking_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2825,
+            "output_tokens": 147,
+            "total_tokens": 2972,
+            "latency_ms": 5288,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-change-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours",
+                  "night_awakenings"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2839,
+            "output_tokens": 215,
+            "total_tokens": 3054,
+            "latency_ms": 4946,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-change-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "barking_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2680,
+            "output_tokens": 107,
+            "total_tokens": 2787,
+            "latency_ms": 4762,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-compare-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 2,
+            "input_tokens": 5539,
+            "output_tokens": 339,
+            "total_tokens": 5878,
+            "latency_ms": 9630,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-compare-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "evening_walk_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2865,
+            "output_tokens": 232,
+            "total_tokens": 3097,
+            "latency_ms": 5235,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-event-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2713,
+            "output_tokens": 123,
+            "total_tokens": 2836,
+            "latency_ms": 5328,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-event-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2695,
+            "output_tokens": 125,
+            "total_tokens": 2820,
+            "latency_ms": 4096,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-mixed-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "scratching_count"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-31",
+                "end_date": "2026-08-10",
+                "kinds": [
+                  "note"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 2,
+            "input_tokens": 4472,
+            "output_tokens": 228,
+            "total_tokens": 4700,
+            "latency_ms": 6619,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-mixed-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "precipitation_mm"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-12",
+                "end_date": "2026-08-18",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 5,
+            "tool_calls": 3,
+            "input_tokens": 8127,
+            "output_tokens": 614,
+            "total_tokens": 8741,
+            "latency_ms": 12819,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-outscope-01",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 0,
+            "input_tokens": 2168,
+            "output_tokens": 343,
+            "total_tokens": 2511,
+            "latency_ms": 6515,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "confirm-outscope-02",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1289,
+            "output_tokens": 70,
+            "total_tokens": 1359,
+            "latency_ms": 2239,
+            "accepted": true
+          }
+        }
+      ]
+    }
+  ]
+}

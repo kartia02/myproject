@@ -7,7 +7,7 @@
 - 60일 Synthetic Scenario 3종과 평가 전용 Ground Truth
 - Fixed Personal Baseline과 변화율·절대 변화량·효과크기를 함께 사용하는 설명 가능한 변화 탐지
 - `get_baseline`, `detect_changes`, `compare_periods`, `get_events` Tool
-- OpenAI Responses API 기반 Agent 및 필수 Tool 호출·문장별 Evidence·수치·금지 주장 검증
+- OpenAI Responses API 기반 동적 Agent: 질문별 Tool·지표·기간 선택, Structured Output, Evidence Ledger 검증
 - API 실패 시에도 동작하는 계산 기반 안전 리포트
 - FastAPI REST API, React Dashboard, PostgreSQL 저장
 - IP 기반 Rate Limit, Agent 최대 4 Step, 출력 토큰 제한
@@ -15,7 +15,7 @@
 - 계정 없이 반려견 이름을 등록하고 합성 예시 또는 개인 기록 모드를 선택하는 브라우저 기반 체험
 - 개인 기록은 브라우저 `localStorage`에 보관하고 30일 Baseline + 최근 7일이 모이면 동일한 분석 흐름으로 조사
 
-자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 질문에 따라 Tool을 선택하는 다음 단계는 [Agent 오케스트레이션 전환 계획](docs/agent-orchestration-plan.md)을 따릅니다.
+자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 동적 Tool 선택의 설계와 측정 결과는 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에 정리되어 있습니다.
 
 ## 공개 데모
 
@@ -99,15 +99,19 @@ cd backend
 pytest
 cd ../evaluation
 python evaluate.py
+# 기존 고정 4-Tool 정책 기준선
+python evaluate_agent.py
 # 유료 실제 모델 평가(키 설정 후)
-python evaluate_live.py --runs 1
+python evaluate_live.py --split development --runs 1
+python evaluate_live.py --split holdout --runs 3
+python evaluate_live.py --cases agent_confirmation_cases.json --split confirmation --runs 1
 cd ../frontend
 npm run build
 ```
 
 평가 결과는 변화 탐지 Precision·Recall·F1, 변화 시작일 오차, 강건성 케이스 통과 수, Evidence Precision, Unsupported Claim Rate를 출력합니다.
 현재 고정 평가 결과는 [`evaluation/results.json`](evaluation/results.json)에 보관합니다. 3개 공개 시나리오와 23개 결정론적 강건성 케이스를 검증하며, 실제 Luna 응답 평가는 API Key 설정 후 별도 실행해야 합니다.
-실제 Luna 표본 결과는 [`evaluation/live_results.json`](evaluation/live_results.json)에 보관합니다. Agent 리포트에는 API 요청 수, Tool 호출 수, 입력·출력 토큰, 지연 시간과 채택 여부가 포함됩니다.
+Agent Routing 평가 30문항은 개발용 20개와 보류용 10개로 분리합니다. 기존 고정 정책 기준선은 [`evaluation/agent_baseline_results.json`](evaluation/agent_baseline_results.json), 개발 결과는 [`evaluation/agent_development_results.json`](evaluation/agent_development_results.json), 보강 후 보류 질문 3회 반복 결과는 [`evaluation/agent_regression_results.json`](evaluation/agent_regression_results.json)에 보관합니다. 반복 평가 30건에서 필수 Tool Recall 97.0%, Tool 선택 정밀도 100%, 불필요 호출률 0%, Agent 응답 채택률 96.7%, 질문당 추정 비용 $0.000814를 기록했습니다. 이후 새 확인용 12문항에서 필수 Tool Recall과 응답 채택률 100%를 확인했고, 발견된 중복 호출과 일반 메모 분류 문제를 수정한 표적 회귀 2문항도 전 항목 100%를 기록했습니다. LLM 결과는 확률적으로 달라질 수 있으므로 단일 실행 수치와 반복 결과를 함께 보관합니다.
 
 공개 배포에서도 세 시나리오 조회, `GPT-5.6 Luna` 리포트, Evidence 4건, Tool 호출 과정, Neon 조사 기록 저장을 확인했습니다. 운영 설정과 재배포 순서는 [배포 계획](docs/deployment-plan.md)을 따릅니다.
 

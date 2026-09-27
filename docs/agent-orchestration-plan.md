@@ -2,7 +2,7 @@
 
 ## 목적
 
-현재 Pet Detective는 GPT-5.6 Luna를 실제 호출하고 네 개의 Tool을 실행하지만, 서버가 Luna 호출 전에 변화와 Evidence를 계산해 전달하고 모든 Tool 호출을 강제한다. 따라서 현재 구현은 안전하게 제한된 Tool 사용 LLM이며, 질문에 따라 조사 계획을 세우는 Agent 동작은 아직 제한적이다.
+전환 전 Pet Detective는 GPT-5.6 Luna를 실제 호출했지만, 서버가 Luna 호출 전에 변화와 Evidence를 계산해 전달하고 네 Tool 호출을 모두 강제했다. 2026-09-27에 아래 구조로 전환했으며, 이 문서는 계획과 실제 측정 결과를 함께 기록한다.
 
 이번 전환의 목표는 Python 분석 결과를 진실의 원천으로 유지하면서 Luna가 사용자 질문을 해석하고 필요한 Tool, 호출 순서, 추가 조사 여부를 결정하도록 만드는 것이다.
 
@@ -68,9 +68,9 @@ Luna가 통계를 직접 계산하거나 Python 결과를 덮어쓰도록 만들
 
 서버는 모든 Tool을 강제하지 않고 최종 주장에 필요한 Tool이 호출됐는지 검사한다.
 
-- 변화 주장에는 `detect_changes` 결과가 필요하다.
+- 지속성과 임계값을 충족한 변화 탐지 주장에는 `detect_changes` 결과가 필요하다.
 - Baseline 수치에는 `get_baseline` 또는 동일 값을 제공한 분석 결과가 필요하다.
-- 기간 비교 주장에는 `compare_periods` 결과가 필요하다.
+- 두 기간의 평균과 단순 증감 설명에는 `compare_periods` 결과가 필요하다.
 - 이벤트 언급에는 `get_events` 결과가 필요하다.
 
 ## Evidence Ledger
@@ -135,20 +135,22 @@ Luna에게 사전 계산된 Evidence Catalog를 전달하지 않는다. 각 Tool
 
 ## 구현 순서
 
-1. Tool별 Pydantic 인자 Schema와 서버 검증을 추가한다.
-2. 요청 시작 시 Scenario Snapshot을 고정하는 조사 Context를 만든다.
-3. Evidence Ledger와 Tool 결과→Evidence 변환기를 구현한다.
-4. Luna 초기 입력에서 사전 계산 Evidence를 제거한다.
-5. 모든 Tool 호출 강제 조건을 제거한다.
-6. 최대 4 Step의 동적 Tool 반복 루프를 구현한다.
-7. 동일 Tool·동일 인자 중복 호출을 차단한다.
-8. 최종 응답을 Structured Output으로 변경한다.
-9. 검증 계층을 Evidence Ledger 기준으로 변경한다.
-10. fallback이 기존과 동일한 분석 결과를 반환하는지 회귀 테스트한다.
-11. 질문별 Tool 선택 평가 세트를 추가한다.
-12. React UI에 선택한 Tool과 짧은 조사 목적을 표시한다.
-13. 실제 Luna 반복 평가 후 비용·지연·채택률을 기록한다.
-14. README와 구현 명세, 라이브 평가 결과를 갱신한다.
+1. 질문별 필수·허용 Tool, 인자, 호출 순서를 표시한 평가 세트를 먼저 만들고 현재 고정 정책의 기준선을 측정한다.
+2. Tool별 Pydantic 인자 Schema와 서버 검증을 추가한다.
+3. 요청 시작 시 Scenario Snapshot을 고정하는 조사 Context를 만든다.
+4. Evidence Ledger와 Tool 결과→Evidence 변환기를 구현한다.
+5. Luna 초기 입력에서 사전 계산 Evidence를 제거한다.
+6. 모든 Tool 호출 강제 조건을 제거한다.
+7. 최대 4 Step의 동적 Tool 반복 루프를 구현한다.
+8. 동일 Tool·동일 인자 중복 호출을 차단한다.
+9. 최종 응답을 Structured Output으로 변경한다.
+10. 검증 계층을 Evidence Ledger 기준으로 변경한다.
+11. 수정 가능한 Tool 선택·인자 오류는 한 번만 교정하고, 실패하면 Safe fallback을 반환한다.
+12. fallback이 기존과 동일한 분석 결과를 반환하는지 회귀 테스트한다.
+13. React UI에 선택한 Tool과 짧은 조사 목적을 표시한다.
+14. 같은 평가 세트로 변경 전후 Tool 선택·인자 정확도를 비교한다.
+15. 실제 Luna 반복 평가 후 비용·지연·채택률을 기록한다.
+16. README와 구현 명세, 라이브 평가 결과를 갱신한다.
 
 ## 파일별 예상 변경 범위
 
@@ -192,6 +194,41 @@ Luna에게 사전 계산된 Evidence Catalog를 전달하지 않는다. 각 Tool
 - 실패 상황에서 기존 Safe fallback이 정상 동작한다.
 - 자동 테스트, 결정론적 평가, 실제 Luna 평가, 프런트엔드 빌드가 통과한다.
 - Neon `investigation_runs`에 선택한 Tool, Evidence, 사용량과 최종 모드가 저장된다.
+
+## 2026-09-27 구현 및 평가 결과
+
+- 30개 질문을 개발용 20개와 보류용 10개로 분리하고 필수·허용 Tool, 인자, 순서를 Ground Truth로 작성했다.
+- 기존 고정 4-Tool 정책은 Tool 선택 정밀도 30.0%, 불필요 호출률 70.0%, 인자 정확도 0%였다.
+- 질문별 Tool 인자, Scenario Snapshot 고정, Evidence Ledger, 최대 4 Step, 중복 차단, Structured Output을 구현했다.
+- 최종 답변이 Evidence 검증에 실패하면 한 번 다시 작성하고, 다시 실패하면 Safe fallback을 사용한다.
+- 개발 20문항 최종 실행은 응답 채택률 100%, 필수 Tool Recall 100%, Tool 선택 정밀도 100%, 인자 정확도 100%였다.
+- 최초 보류 10문항은 응답 채택률 100%, Tool 선택 정밀도 100%였지만 환경·행동 복합 질문 한 건에서 `compare_periods`를 빠뜨려 필수 Tool Recall 90.9%였다.
+- 이 실패 유형을 보강한 뒤 보류 질문 10개를 3회 반복한 회귀 평가 30건에서 응답 채택률 96.7%, 필수 Tool Recall 97.0%, Tool 선택 정밀도 100%, 불필요 호출률 0%, 인자 정확도 97.0%를 기록했다.
+- 반복 평가의 평균 지연은 4,998ms, 질문당 추정 비용은 $0.000814였다. 이는 실제 모델의 표본 결과이며 실행마다 달라질 수 있다.
+- 반복 평가에서 한 번 발생한 빈 이벤트 조회 누락은 초기 입력에 이벤트 종류가 없다는 사실을 노출한 것이 원인이었다. 해당 정보를 제거하고 이벤트 종류 Schema를 제한한 뒤 같은 질문을 3회 연속 실행해 모두 `get_events(kinds=["all"])` 호출과 최종 검증을 통과했다.
+- 기존 질문과 다른 확인용 12문항을 한 차례 실행한 결과 응답 채택률과 필수 Tool Recall은 100%였다. Tool 선택 정밀도는 92.9%, 인자 정확도는 92.3%로, 평균 비교 질문의 불필요한 `get_baseline` 호출과 일반적인 “생활 메모”를 `note`로만 좁히는 두 사례가 발견됐다.
+- `compare_periods`가 양쪽 평균을 이미 제공한다는 규칙을 명시하고, 모호한 `note` 필터를 Tool Schema에서 제거했다. 자유 메모는 계속 `note`로 저장하지만 일반 메모·기록 질문은 `all`로 조회해 `routine`, `weather`, `note`를 빠뜨리지 않는다.
+- 수정 후 새로운 표현으로 만든 표적 회귀 2문항은 응답 채택률, 필수 Tool Recall, Tool 선택 정밀도, 인자 정확도, 호출 순서 정확도 모두 100%였고 불필요·중복 호출은 0%였다. 평균 지연은 6,102ms, 질문당 추정 비용은 $0.000960이었다.
+
+평가 원본은 `evaluation/agent_baseline_results.json`, `evaluation/agent_development_results.json`, `evaluation/agent_holdout_results.json`, `evaluation/agent_regression_results.json`, `evaluation/agent_confirmation_results.json`, `evaluation/agent_targeted_regression_results.json`에 보관한다.
+
+## 학습용 용어 정리
+
+| 용어 | 이 프로젝트에서의 의미 |
+| --- | --- |
+| Ground Truth | 질문마다 사람이 정한 필수·허용 Tool, 인자와 호출 순서 정답 |
+| Development Set | 실패 원인을 찾고 Tool 설명과 Agent 지침을 개선하는 20문항 |
+| Holdout Set | 개선 중 정답을 맞추는 데 직접 사용하지 않고 일반화 성능을 확인하는 10문항 |
+| Tool Recall | 반드시 호출해야 하는 Tool 중 실제 호출한 비율 |
+| Tool Precision | Agent가 호출한 Tool 중 질문에 허용된 Tool의 비율 |
+| Evidence Ledger | 실제로 실행한 Tool이 반환한 근거만 요청 단위로 누적하는 저장소 |
+| Structured Output | Luna의 최종 답변을 자유 텍스트가 아니라 Pydantic Schema에 맞춘 데이터로 받는 방식 |
+| Dispatcher | Luna가 요청한 Tool 이름과 인자를 검사한 뒤 고정된 Scenario에서 Python 함수를 실행하는 계층 |
+| Safe fallback | API 오류나 검증 실패 때 Python 계산 결과로 제공하는 안전한 기본 답변 |
+
+설명할 때는 “Agent의 Tool 선택 정확도를 높이려면 Ground Truth 평가 세트가 필요합니다. 실패 유형을 기준으로 Tool 계약과 지침을 개선하고, 별도의 보류 질문과 반복 실행으로 실제 개선 여부를 확인해야 하기 때문입니다.”라고 정리할 수 있다.
+
+보류 질문의 실패 내용을 보고 지침을 수정한 순간부터 그 질문은 더 이상 완전히 보지 않은 최종 시험지가 아니다. 그래서 최초 `agent_holdout_results.json`은 일반화 확인 결과로 보존하고, 수정 후 같은 질문을 반복한 `agent_regression_results.json`은 회귀 안정성 결과로 구분한다.
 
 ## 예상 작업량
 

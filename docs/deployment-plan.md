@@ -70,7 +70,7 @@ def _client_key(request: Request) -> str:
 client = OpenAI(api_key=settings.openai_api_key, timeout=30.0, max_retries=1)
 ```
 
-조사 1회에 API 요청이 2회 발생하므로 최악의 경우가 약 60초로 묶인다. 타임아웃이 발생하면 기존 `except` 절이 잡아서 계산 리포트로 응답한다.
+단일 Tool 질문은 보통 API 요청 2회가 발생한다. 최대 4개의 순차 Tool과 최종 답변 교정까지 사용하면 API 요청 수가 더 늘 수 있으며, 2026-09-27 반복 평가의 평균은 2.2회와 약 5초였다. 각 요청의 30초 타임아웃이 발생하면 기존 `except` 절이 잡아서 계산 리포트로 응답한다.
 
 ### 2.5 시작 시 데이터베이스 초기화 내구성
 

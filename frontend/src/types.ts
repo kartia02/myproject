@@ -57,7 +57,7 @@ export type ChangeFinding = {
 
 export type Evidence = {
   id: string;
-  kind: "change" | "comparison" | "event";
+  kind: "baseline" | "change" | "comparison" | "event";
   statement: string;
   start_date: string;
   end_date: string;

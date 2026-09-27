@@ -2,7 +2,7 @@
 
 이 문서는 `Pet Detective — 개인 반려견 행동 변화 분석 AI Agent 기획서.md`를 코드 수준으로 구체화한 현재 구현 기준이다. v1.0의 공개 합성 데모에 v1.1 브라우저 기반 개인 기록 체험을 추가했다.
 
-현재의 필수 4-Tool 호출 구조를 질문별 동적 Tool 선택 구조로 전환하는 후속 작업은 [Agent 오케스트레이션 전환 계획](agent-orchestration-plan.md)에 기록한다.
+필수 4-Tool 호출 구조를 질문별 동적 Tool 선택 구조로 전환했으며, 설계와 변경 전후 평가는 [Agent 오케스트레이션 전환 문서](agent-orchestration-plan.md)에 기록한다.
 
 ## 확정 범위
 
@@ -56,16 +56,16 @@ Ground Truth는 `evaluation/ground_truth.json`에만 보관하며 서비스와 A
 
 숫자는 Python 분석 모듈에서 계산한다. Agent는 다음 Tool만 호출한다.
 
-- `get_baseline()`
-- `detect_changes()`
-- `compare_periods()`
-- `get_events()`
+- `get_baseline(metrics)`
+- `detect_changes(metrics)`
+- `compare_periods(metrics)`
+- `get_events(start_date, end_date, kinds)`
 
-Agent 응답을 사용하려면 한 번의 조사에서 위 네 Tool을 각각 정확히 한 번 호출해야 한다. 하나라도 호출하지 않거나 같은 Tool을 반복 호출하면 Tool 검증 실패로 처리하고 안전한 규칙 기반 리포트로 대체한다. 이 조건을 포함해 한 요청의 Tool 호출 수는 최대 4회다.
+Luna는 질문에 필요한 Tool과 지표만 선택한다. 서버는 현재 조사에서 고정한 Scenario Snapshot을 모든 Tool에 주입하고, 지표·날짜·이벤트 종류를 검증한다. 같은 Tool과 같은 인자의 반복 호출을 금지하며 한 요청의 Tool 호출 수는 최대 4회다.
 
-변화 Evidence에는 최근 비교 구간뿐 아니라 Python 분석 엔진이 계산한 변화 시작일을 포함한다. 변화가 하나도 없으면 Luna API를 호출하지 않고 계산 기반 리포트를 반환한다. 실제 호출 시 API 요청 수, Tool 호출 수, 입력·출력 토큰, 지연 시간과 최종 채택 여부를 기록한다.
+Luna에게 사전 계산한 Evidence 전체를 주지 않는다. Tool이 실제로 실행될 때마다 서버가 결과를 Evidence Ledger에 추가한다. 변화나 이벤트가 발견되지 않은 경우에도 조회 결과가 없다는 음성 Evidence를 남긴다. 실제 호출 시 API 요청 수, Tool 호출 수, 인자, 입력·출력 토큰, 지연 시간과 최종 채택 여부를 기록한다.
 
-Evidence에는 고유 ID, 지표, 기준 기간, 비교 기간, 기준값, 관측값, 단위, 원본 날짜가 포함된다. 자연어 응답은 각 문장에 `[E1]` 형식으로 Evidence ID를 연결해야 한다. 존재하지 않는 ID, 근거에 없는 수치·날짜, 명시적인 인과·진단 주장이 포함되면 LLM 응답을 사용하지 않고 안전한 리포트로 대체한다.
+Evidence에는 고유 ID, 출처 Tool, 지표, 기준 기간, 비교 기간, 기준값, 관측값, 단위와 원본 날짜가 포함된다. 최종 답변은 Pydantic `AgentAnswer` 구조로 받고 각 Finding에 Evidence ID를 연결한다. 존재하지 않는 ID, 호출하지 않은 Tool의 Evidence, 근거에 없는 수치·날짜, 명시적인 인과·진단 주장이 포함되면 한 번 다시 작성하게 한다. 두 번째 결과도 실패하면 계산 기반 안전 리포트로 대체한다.
 
 서비스는 동시에 나타난 변화와 날짜 기반 이벤트를 설명할 수 있지만 원인 또는 질병으로 표현하지 않는다.
 
@@ -88,7 +88,7 @@ Python·SQL이 데이터 조회 및 통계 분석
     ↓
 Luna가 Evidence 기반 설명 작성
     ↓
-서버가 Evidence ID를 검증
+서버가 Structured Output과 Evidence ID·수치·날짜를 검증
     ↓
 사용자에게 결과 전달
 ```

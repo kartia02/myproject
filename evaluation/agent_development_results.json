@@ -1,0 +1,589 @@
+{
+  "model": "gpt-5.6-luna",
+  "split": "development",
+  "runs_per_case": 1,
+  "samples": 20,
+  "acceptance_rate": 1.0,
+  "scores": {
+    "required_tool_recall": 1.0,
+    "tool_selection_precision": 1.0,
+    "unnecessary_tool_call_rate": 0.0,
+    "exact_tool_set_rate": 0.9,
+    "argument_accuracy": 1.0,
+    "order_accuracy": 1.0,
+    "status_accuracy": 1.0,
+    "duplicate_call_case_rate": 0.0
+  },
+  "average_api_requests": 2.25,
+  "average_latency_ms": 5392,
+  "average_input_tokens": 3149,
+  "average_output_tokens": 208,
+  "estimated_cost_usd_total": 0.017579,
+  "estimated_cost_usd_per_case": 0.000879,
+  "runs": [
+    {
+      "run": 1,
+      "scores": {
+        "dataset": {
+          "cases": 20,
+          "evaluated": 20,
+          "categories": {
+            "baseline": 3,
+            "change": 5,
+            "comparison": 3,
+            "event": 3,
+            "mixed": 3,
+            "no_change": 1,
+            "out_of_scope": 2
+          },
+          "splits": {
+            "development": 20
+          }
+        },
+        "required_tool_recall": 1.0,
+        "tool_selection_precision": 1.0,
+        "unnecessary_tool_call_rate": 0.0,
+        "exact_tool_set_rate": 0.9,
+        "argument_accuracy": 1.0,
+        "order_accuracy": 1.0,
+        "status_accuracy": 1.0,
+        "duplicate_call_case_rate": 0.0,
+        "missing_observations": [],
+        "failed_cases": [
+          {
+            "id": "compare-awakening-sleep-02",
+            "failures": [
+              "tool_set"
+            ]
+          },
+          {
+            "id": "mixed-rain-activity-01",
+            "failures": [
+              "tool_set"
+            ]
+          }
+        ]
+      },
+      "samples": [
+        {
+          "case_id": "baseline-activity-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2632,
+            "output_tokens": 94,
+            "total_tokens": 2726,
+            "latency_ms": 4463,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "baseline-walk-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2656,
+            "output_tokens": 101,
+            "total_tokens": 2757,
+            "latency_ms": 3490,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "baseline-meal-03",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_baseline",
+              "arguments": {
+                "metrics": [
+                  "meal_grams"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2638,
+            "output_tokens": 99,
+            "total_tokens": 2737,
+            "latency_ms": 4077,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-general-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 3103,
+            "output_tokens": 247,
+            "total_tokens": 3350,
+            "latency_ms": 5242,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-awakening-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "night_awakenings"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2728,
+            "output_tokens": 132,
+            "total_tokens": 2860,
+            "latency_ms": 3978,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-scratching-03",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "scratching_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2740,
+            "output_tokens": 221,
+            "total_tokens": 2961,
+            "latency_ms": 4914,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-activity-04",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2735,
+            "output_tokens": 202,
+            "total_tokens": 2937,
+            "latency_ms": 4822,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-walk-05",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2739,
+            "output_tokens": 178,
+            "total_tokens": 2917,
+            "latency_ms": 4225,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "change-stable-06",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "all"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2636,
+            "output_tokens": 141,
+            "total_tokens": 2777,
+            "latency_ms": 4377,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-walk-activity-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes",
+                  "activity_minutes"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2777,
+            "output_tokens": 235,
+            "total_tokens": 3012,
+            "latency_ms": 4699,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-awakening-sleep-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "night_awakenings",
+                  "sleep_hours"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "night_awakenings",
+                  "sleep_hours"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 3,
+            "tool_calls": 2,
+            "input_tokens": 4517,
+            "output_tokens": 273,
+            "total_tokens": 4790,
+            "latency_ms": 6387,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "compare-baseline-recent-03",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "scratching_count"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2662,
+            "output_tokens": 135,
+            "total_tokens": 2797,
+            "latency_ms": 4043,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-routine-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "routine"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2655,
+            "output_tokens": 128,
+            "total_tokens": 2783,
+            "latency_ms": 5019,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-weather-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2628,
+            "output_tokens": 120,
+            "total_tokens": 2748,
+            "latency_ms": 5673,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "event-all-03",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-01",
+                "end_date": "2026-08-29",
+                "kinds": [
+                  "routine"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 2,
+            "tool_calls": 1,
+            "input_tokens": 2646,
+            "output_tokens": 124,
+            "total_tokens": 2770,
+            "latency_ms": 4188,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-rain-activity-01",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "compare_periods",
+              "arguments": {
+                "metrics": [
+                  "activity_minutes",
+                  "precipitation_mm"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-08",
+                "end_date": "2026-08-22",
+                "kinds": [
+                  "weather"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 3,
+            "input_tokens": 6476,
+            "output_tokens": 380,
+            "total_tokens": 6856,
+            "latency_ms": 9846,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-walk-routine-02",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "evening_walk_minutes"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-07-30",
+                "end_date": "2026-08-01",
+                "kinds": [
+                  "routine"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 2,
+            "input_tokens": 5702,
+            "output_tokens": 453,
+            "total_tokens": 6155,
+            "latency_ms": 10098,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "mixed-night-full-03",
+          "accepted": true,
+          "status": "completed",
+          "calls": [
+            {
+              "tool": "detect_changes",
+              "arguments": {
+                "metrics": [
+                  "night_awakenings"
+                ]
+              }
+            },
+            {
+              "tool": "get_events",
+              "arguments": {
+                "start_date": "2026-08-01",
+                "end_date": "2026-08-05",
+                "kinds": [
+                  "routine"
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "api_requests": 4,
+            "tool_calls": 2,
+            "input_tokens": 5805,
+            "output_tokens": 625,
+            "total_tokens": 6430,
+            "latency_ms": 11900,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "out-of-scope-diagnosis-01",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1249,
+            "output_tokens": 181,
+            "total_tokens": 1430,
+            "latency_ms": 3853,
+            "accepted": true
+          }
+        },
+        {
+          "case_id": "out-of-scope-cause-02",
+          "accepted": true,
+          "status": "out_of_scope",
+          "calls": [],
+          "usage": {
+            "api_requests": 1,
+            "tool_calls": 0,
+            "input_tokens": 1249,
+            "output_tokens": 85,
+            "total_tokens": 1334,
+            "latency_ms": 2543,
+            "accepted": true
+          }
+        }
+      ]
+    }
+  ]
+}

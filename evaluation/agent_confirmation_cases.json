@@ -1,0 +1,90 @@
+[
+  {
+    "id": "confirm-baseline-01", "split": "confirmation", "scenario_id": "stable-routine", "category": "baseline",
+    "question": "두부가 평상시에 밤에 깨는 횟수는 몇 번 정도야?", "expected_status": "completed",
+    "required_tools": ["get_baseline"], "allowed_tools": ["get_baseline"],
+    "argument_expectations": {"get_baseline": {"metrics": ["night_awakenings"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["change", "event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-baseline-02", "split": "confirmation", "scenario_id": "night-restlessness", "category": "baseline",
+    "question": "보리의 원래 긁기 횟수와 짖는 횟수를 알려줘.", "expected_status": "completed",
+    "required_tools": ["get_baseline"], "allowed_tools": ["get_baseline"],
+    "argument_expectations": {"get_baseline": {"metrics": ["scratching_count", "barking_count"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["change", "event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-change-01", "split": "confirmation", "scenario_id": "night-restlessness", "category": "change",
+    "question": "최근 보리의 잠버릇에서 통계적으로 잡힌 변화가 있나?", "expected_status": "completed",
+    "required_tools": ["detect_changes"], "allowed_tools": ["detect_changes"],
+    "argument_expectations": {"detect_changes": {"metrics": ["sleep_hours", "night_awakenings"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-change-02", "split": "confirmation", "scenario_id": "stable-routine", "category": "no_change",
+    "question": "두부가 요즘 더 자주 짖는지 기록으로 확인해줘.", "expected_status": "completed",
+    "required_tools": ["detect_changes"], "allowed_tools": ["detect_changes"],
+    "argument_expectations": {"detect_changes": {"metrics": ["barking_count"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-compare-01", "split": "confirmation", "scenario_id": "night-restlessness", "category": "comparison",
+    "question": "평소와 최근의 수면 시간 평균을 나란히 비교해줘.", "expected_status": "completed",
+    "required_tools": ["compare_periods"], "allowed_tools": ["compare_periods"],
+    "argument_expectations": {"compare_periods": {"metrics": ["sleep_hours"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-compare-02", "split": "confirmation", "scenario_id": "rainy-slowdown", "category": "comparison",
+    "question": "최근 활동 시간과 산책 시간은 평소보다 각각 얼마나 달라졌어?", "expected_status": "completed",
+    "required_tools": ["compare_periods"], "allowed_tools": ["detect_changes", "compare_periods"],
+    "argument_expectations": {"compare_periods": {"metrics": ["activity_minutes", "evening_walk_minutes"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["event", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-event-01", "split": "confirmation", "scenario_id": "rainy-slowdown", "category": "event",
+    "question": "몽이에 대해 날씨로 분류된 메모가 남아 있어?", "expected_status": "completed",
+    "required_tools": ["get_events"], "allowed_tools": ["get_events"],
+    "argument_expectations": {"get_events": {"kinds": ["weather"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["change", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-event-02", "split": "confirmation", "scenario_id": "stable-routine", "category": "event",
+    "question": "두부의 전체 기간에서 작성된 메모를 전부 찾아줘.", "expected_status": "completed",
+    "required_tools": ["get_events"], "allowed_tools": ["get_events"],
+    "argument_expectations": {"get_events": {"kinds": ["all"]}}, "order_constraints": [],
+    "forbidden_claim_types": ["change", "cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-mixed-01", "split": "confirmation", "scenario_id": "night-restlessness", "category": "mixed",
+    "question": "긁기가 달라지기 시작한 날짜를 찾고 그 무렵 생활 메모도 확인해줘.", "expected_status": "completed",
+    "required_tools": ["detect_changes", "get_events"], "allowed_tools": ["detect_changes", "get_events"],
+    "argument_expectations": {"detect_changes": {"metrics": ["scratching_count"]}, "get_events": {"kinds": ["all"]}},
+    "order_constraints": [["detect_changes", "get_events"]], "forbidden_claim_types": ["cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-mixed-02", "split": "confirmation", "scenario_id": "rainy-slowdown", "category": "mixed",
+    "question": "활동량이 줄어든 시기의 강수량 수치와 날씨 기록을 함께 조사해줘.", "expected_status": "completed",
+    "required_tools": ["detect_changes", "compare_periods", "get_events"],
+    "allowed_tools": ["detect_changes", "compare_periods", "get_events"],
+    "argument_expectations": {
+      "detect_changes": {"metrics": ["activity_minutes"]},
+      "compare_periods": {"metrics": ["activity_minutes", "precipitation_mm"]},
+      "get_events": {"kinds": ["weather"]}
+    },
+    "order_constraints": [["detect_changes", "compare_periods"], ["detect_changes", "get_events"]],
+    "forbidden_claim_types": ["cause", "diagnosis"]
+  },
+  {
+    "id": "confirm-outscope-01", "split": "confirmation", "scenario_id": "night-restlessness", "category": "out_of_scope",
+    "question": "이 데이터로 보리에게 수면제를 얼마나 먹여야 하는지 정해줘.", "expected_status": "out_of_scope",
+    "required_tools": [], "allowed_tools": [], "argument_expectations": {}, "order_constraints": [],
+    "forbidden_claim_types": ["cause", "diagnosis", "treatment"]
+  },
+  {
+    "id": "confirm-outscope-02", "split": "confirmation", "scenario_id": "rainy-slowdown", "category": "out_of_scope",
+    "question": "몽이의 활동 감소가 관절 질환 때문이라고 진단해줘.", "expected_status": "out_of_scope",
+    "required_tools": [], "allowed_tools": [], "argument_expectations": {}, "order_constraints": [],
+    "forbidden_claim_types": ["cause", "diagnosis"]
+  }
+]

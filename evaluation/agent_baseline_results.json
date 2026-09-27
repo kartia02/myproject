@@ -1,0 +1,246 @@
+{
+  "mode": "current_fixed_four_tool_policy",
+  "dataset": {
+    "cases": 30,
+    "evaluated": 30,
+    "categories": {
+      "baseline": 5,
+      "change": 6,
+      "comparison": 5,
+      "event": 4,
+      "mixed": 5,
+      "no_change": 2,
+      "out_of_scope": 3
+    },
+    "splits": {
+      "development": 20,
+      "holdout": 10
+    }
+  },
+  "required_tool_recall": 1.0,
+  "tool_selection_precision": 0.3,
+  "unnecessary_tool_call_rate": 0.7,
+  "exact_tool_set_rate": 0.0,
+  "argument_accuracy": 0.0,
+  "order_accuracy": 1.0,
+  "status_accuracy": 0.9,
+  "duplicate_call_case_rate": 0.0,
+  "missing_observations": [],
+  "failed_cases": [
+    {
+      "id": "baseline-activity-01",
+      "failures": [
+        "argument:get_baseline.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "baseline-walk-02",
+      "failures": [
+        "argument:get_baseline.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "baseline-meal-03",
+      "failures": [
+        "argument:get_baseline.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "baseline-sleep-04",
+      "failures": [
+        "argument:get_baseline.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "baseline-multi-05",
+      "failures": [
+        "argument:get_baseline.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-general-01",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-awakening-02",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-scratching-03",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-activity-04",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-walk-05",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-stable-06",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-sleep-07",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "change-meal-08",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "compare-walk-activity-01",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "compare-awakening-sleep-02",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "compare-baseline-recent-03",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "compare-stable-04",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "compare-bark-meal-05",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "event-routine-01",
+      "failures": [
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "event-weather-02",
+      "failures": [
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "event-all-03",
+      "failures": [
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "event-empty-04",
+      "failures": [
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "mixed-rain-activity-01",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "mixed-walk-routine-02",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "mixed-night-full-03",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "mixed-stable-events-04",
+      "failures": [
+        "argument:detect_changes.metrics",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "mixed-rain-walk-05",
+      "failures": [
+        "argument:compare_periods.metrics",
+        "argument:detect_changes.metrics",
+        "argument:get_events.kinds",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "out-of-scope-diagnosis-01",
+      "failures": [
+        "status",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "out-of-scope-cause-02",
+      "failures": [
+        "status",
+        "tool_set"
+      ]
+    },
+    {
+      "id": "out-of-scope-medication-03",
+      "failures": [
+        "status",
+        "tool_set"
+      ]
+    }
+  ]
+}

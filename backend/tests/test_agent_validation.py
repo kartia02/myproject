@@ -1,7 +1,8 @@
-from app.agent import _agent_response_is_valid, _required_tools_were_called, investigate
+from app.agent import _agent_answer_is_valid, _agent_response_is_valid, investigate
 from app.config import Settings
-from app.schemas import ToolTrace
+from app.schemas import AgentAnswer, AgentFinding, ToolTrace
 from app.synthetic import get_scenario
+from app.tools import execute_tool
 
 
 def evidence_for_changed_scenario():
@@ -102,15 +103,49 @@ def test_event_can_name_metric_without_claiming_detected_change() -> None:
     assert _agent_response_is_valid(text, report.evidence)
 
 
-def test_agent_mode_requires_each_investigation_tool_exactly_once() -> None:
-    complete = [
-        ToolTrace(step=1, tool="get_baseline", summary="done"),
-        ToolTrace(step=2, tool="detect_changes", summary="done"),
-        ToolTrace(step=3, tool="compare_periods", summary="done"),
-        ToolTrace(step=4, tool="get_events", summary="done"),
-    ]
-    duplicate = complete[:-1] + [ToolTrace(step=4, tool="detect_changes", summary="done")]
+def test_structured_answer_requires_evidence_from_the_called_tool() -> None:
+    scenario = get_scenario("night-restlessness")
+    execution = execute_tool("get_baseline", {"metrics": ["sleep_hours"]}, scenario)
+    evidence = execution.evidence
+    trace = [ToolTrace(step=1, tool="get_baseline", summary="done", arguments={"metrics": ["sleep_hours"]})]
+    answer = AgentAnswer(
+        status="completed",
+        headline="평소 수면 시간",
+        findings=[AgentFinding(text=evidence[0].statement, evidence_ids=[evidence[0].id])],
+        limitations=[],
+    )
 
-    assert _required_tools_were_called(complete)
-    assert not _required_tools_were_called(complete[:-1])
-    assert not _required_tools_were_called(duplicate)
+    assert _agent_answer_is_valid(answer, evidence, trace)
+    assert not _agent_answer_is_valid(answer, evidence, [ToolTrace(step=1, tool="detect_changes", summary="done")])
+
+
+def test_structured_answer_rejects_new_calculations_and_accepts_clean_out_of_scope() -> None:
+    scenario = get_scenario("rainy-slowdown")
+    execution = execute_tool(
+        "compare_periods",
+        {"metrics": ["activity_minutes", "evening_walk_minutes"]},
+        scenario,
+    )
+    trace = [ToolTrace(step=1, tool="compare_periods", summary="done")]
+    unsupported = AgentAnswer(
+        status="completed",
+        headline="비교 결과",
+        findings=[AgentFinding(text="두 지표의 차이는 999%포인트입니다.", evidence_ids=["E1", "E2"])],
+        limitations=[],
+    )
+    unsupported_headline = AgentAnswer(
+        status="completed",
+        headline="최근 값은 999회입니다.",
+        findings=[AgentFinding(text=execution.evidence[0].statement, evidence_ids=["E1"])],
+        limitations=[],
+    )
+    out_of_scope = AgentAnswer(
+        status="out_of_scope",
+        headline="진단할 수 없습니다.",
+        findings=[],
+        limitations=["수의학적 진단은 제공하지 않습니다."],
+    )
+
+    assert not _agent_answer_is_valid(unsupported, execution.evidence, trace)
+    assert not _agent_answer_is_valid(unsupported_headline, execution.evidence, trace)
+    assert _agent_answer_is_valid(out_of_scope, [], [])
