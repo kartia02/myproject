@@ -18,7 +18,7 @@
 | 반복 평가 질문당 추정 비용 | $0.000814 |
 | 백엔드 자동 테스트 | 41개 통과 |
 
-수치의 조건과 실패 사례까지 포함한 설명은 [포트폴리오·학습 가이드](docs/portfolio-study-guide.md)에서 확인할 수 있습니다.
+수치의 조건과 실패 사례까지 포함한 설명은 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에서 확인할 수 있습니다.
 
 ## 동작 구조
 
@@ -50,7 +50,7 @@ flowchart LR
 - 계정 없이 반려견 이름을 등록하고 합성 예시 또는 개인 기록 모드를 선택하는 브라우저 기반 체험
 - 개인 기록은 브라우저 `localStorage`에 보관하고 30일 Baseline + 최근 7일이 모이면 동일한 분석 흐름으로 조사
 
-자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 동적 Tool 선택의 설계와 측정 결과는 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에 정리되어 있습니다. 프로젝트 소개, 이력서 문장, 면접 Q&A와 용어 학습 순서는 [포트폴리오·학습 가이드](docs/portfolio-study-guide.md)를 따릅니다.
+자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 동적 Tool 선택의 설계와 측정 결과는 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에 정리되어 있습니다.
 
 ## 공개 데모
 
