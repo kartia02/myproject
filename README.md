@@ -2,6 +2,41 @@
 
 개별 반려견의 일상 기록으로 Personal Baseline을 만들고, 최근 변화를 탐지한 뒤 Agent가 관련 기록을 조사해 Evidence와 함께 설명하는 공개 데모입니다.
 
+> **Portfolio v1.1 — Complete**
+>
+> Python이 변화 여부와 수치를 계산하고, GPT-5.6 Luna가 질문에 필요한 Tool을 선택하며, 서버가 모든 최종 주장을 Evidence와 대조합니다. 회원가입과 기기 간 동기화는 AI 검증이라는 핵심 범위를 지키기 위해 v2.0으로 분리했습니다.
+
+## 핵심 성과
+
+| 항목 | 결과 |
+| --- | ---: |
+| 결정론적 변화 탐지 Precision / Recall / F1 | 1.0 / 1.0 / 1.0 |
+| 강건성 평가 | 23 / 23 통과 |
+| Agent 반복 평가 Tool Recall | 97.0% |
+| Agent 반복 평가 Tool Precision | 100% |
+| Agent 반복 평가 응답 채택률 | 96.7% |
+| 반복 평가 질문당 추정 비용 | $0.000814 |
+| 백엔드 자동 테스트 | 41개 통과 |
+
+수치의 조건과 실패 사례까지 포함한 설명은 [포트폴리오·학습 가이드](docs/portfolio-study-guide.md)에서 확인할 수 있습니다.
+
+## 동작 구조
+
+```mermaid
+flowchart LR
+    U[사용자 질문] --> API[FastAPI 입력 검증]
+    API --> A[GPT-5.6 Luna Agent]
+    A -->|질문별 Tool 선택| D[Tool Dispatcher]
+    D --> P[Python 변화 분석]
+    D --> N[(Neon PostgreSQL)]
+    P --> E[Evidence Ledger]
+    N --> E
+    E --> A
+    A --> V[Evidence·수치·날짜 검증]
+    V -->|통과| R[근거가 연결된 답변]
+    V -->|실패 또는 API 오류| F[Safe fallback]
+```
+
 ## 현재 구현
 
 - 60일 Synthetic Scenario 3종과 평가 전용 Ground Truth
@@ -15,7 +50,7 @@
 - 계정 없이 반려견 이름을 등록하고 합성 예시 또는 개인 기록 모드를 선택하는 브라우저 기반 체험
 - 개인 기록은 브라우저 `localStorage`에 보관하고 30일 Baseline + 최근 7일이 모이면 동일한 분석 흐름으로 조사
 
-자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 동적 Tool 선택의 설계와 측정 결과는 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에 정리되어 있습니다.
+자세한 결정은 [구현 명세](docs/implementation-spec.md)에 기록되어 있습니다. 동적 Tool 선택의 설계와 측정 결과는 [Agent 오케스트레이션 전환 문서](docs/agent-orchestration-plan.md)에 정리되어 있습니다. 프로젝트 소개, 이력서 문장, 면접 Q&A와 용어 학습 순서는 [포트폴리오·학습 가이드](docs/portfolio-study-guide.md)를 따릅니다.
 
 ## 공개 데모
 
@@ -23,7 +58,7 @@
 - Backend API: https://pet-detective-api.onrender.com
 - API 문서: https://pet-detective-api.onrender.com/docs
 
-2026-09-21 기준으로 Vercel → Render → Neon → Python 변화 분석 → GPT-5.6 Luna Tool Calling 흐름을 공개 환경에서 검증했습니다. Render 무료 인스턴스는 유휴 상태에서 절전되므로 첫 접속에는 약 1분이 걸릴 수 있습니다. Vercel의 배포별 Preview URL은 Render CORS 허용 목록에 없으므로 고정 Production 도메인을 사용합니다.
+2026-09-27 기준으로 Vercel → Render → Neon → Python 변화 분석 → GPT-5.6 Luna Tool Calling 흐름을 공개 환경에서 검증했습니다. Render 무료 인스턴스는 유휴 상태에서 절전되므로 첫 접속에는 약 1분이 걸릴 수 있습니다. Vercel의 배포별 Preview URL은 Render CORS 허용 목록에 없으므로 고정 Production 도메인을 사용합니다.
 
 처음 접속하면 반려견 이름을 등록하고 두 가지 체험 중 하나를 선택합니다.
 
@@ -138,3 +173,5 @@ Agent Routing 평가 30문항은 개발용 20개와 보류용 10개로 분리합
 ## 프로젝트 경계
 
 이 서비스는 합성 또는 사용자가 직접 입력한 기록에서 관찰된 변화와 함께 나타난 기록을 설명합니다. 인과관계, 질병, 수의학적 판단은 제공하지 않습니다. 현재 버전에는 회원가입, 기기 간 동기화, Timeline Search, Adaptive Baseline이 포함되지 않습니다.
+
+현재 v1.1을 포트폴리오 완성본으로 동결했습니다. Neon 개인 기록 저장, 인증, 기기 간 동기화는 v2.0 백로그이며 현재 완성 조건에 포함하지 않습니다.
